@@ -27,6 +27,18 @@
 
 
 /////* PRIVATE FUNCTIONS */////
+void ROBO_Init(void) {
+    //Initialize Robot Motors
+    ROBOT_RIGHT_DIR = 0;
+    ROBOT_RIGHT_DIR_INV = ~ROBOT_RIGHT_DIR;
+    ROBOT_LEFT_DIR = 0;
+    ROBOT_LEFT_DIR_INV = ~ROBOT_LEFT_DIR;
+    ROBOT_RIGHT_DIR_TRIS = 0;
+    ROBOT_RIGHT_DIR_INV_TRIS = 0;
+    ROBOT_LEFT_DIR_TRIS = 0;
+    ROBOT_LEFT_DIR_INV_TRIS =  0;
+}
+
 int RoboLeftMtrSpeed(int leftSpeed){
     if (leftSpeed <  (-1 * ROBOT_MAXSPEED) || leftSpeed > ROBOT_MAXSPEED){
         //Error with speed bounds!
@@ -35,14 +47,12 @@ int RoboLeftMtrSpeed(int leftSpeed){
     if (leftSpeed < 0){
         ROBOT_LEFT_DIR = 0;
         leftSpeed *= -1;
-        printf("Left Motor less than 0\r\n");
     }
     else{
         ROBOT_LEFT_DIR = 1;
         
     }
     ROBOT_LEFT_DIR_INV = ~ROBOT_LEFT_DIR;
-    printf("LEFT DIR IS %d\r\nLEFT DIR INVERSE IS %d\r\n",ROBOT_LEFT_DIR,ROBOT_LEFT_DIR_INV);
     if (PWM_SetDutyCycle(ROBOT_LEFT_PWM, (leftSpeed * (MAX_PWM / ROBOT_MAXSPEED))) == ERROR){
         return ERROR;
     }
@@ -92,17 +102,30 @@ int RoboLeftTankTurn(int speed){
     return SUCCESS;
 }
 
-void ROBO_Init(void) {
-    //Initialize Robot Motors
-    ROBOT_RIGHT_DIR = 0;
-    ROBOT_RIGHT_DIR_INV = ~ROBOT_RIGHT_DIR;
-    ROBOT_LEFT_DIR = 0;
-    ROBOT_LEFT_DIR_INV = ~ROBOT_LEFT_DIR;
-    ROBOT_RIGHT_DIR_TRIS = 0;
-    ROBOT_RIGHT_DIR_INV_TRIS = 0;
-    ROBOT_LEFT_DIR_TRIS = 0;
-    ROBOT_LEFT_DIR_INV_TRIS =  0;
-    //Initialize Board, AD Ports, and PWM Ports
-
+int RoboForwardLeftTurn() {
+    //call motor functions, EXACT AMOUNTS TBD
+    RoboRightMtrSpeed(100);
+    RoboLeftMtrSpeed(80);
+    return SUCCESS;
 }
 
+int RoboForwardRightTurn() {
+    //call motor functions, EXACT AMOUNTS TBD
+    RoboRightMtrSpeed(80);
+    RoboLeftMtrSpeed(100);
+    return SUCCESS;
+}
+
+int RoboBackLeftTurn() {
+    //call motor functions, EXACT AMOUNTS TBD
+    RoboRightMtrSpeed(-100);
+    RoboLeftMtrSpeed(-80);
+    return SUCCESS;
+}
+
+int RoboBackRightTurn() {
+    //call motor functions, EXACT AMOUNTS TBD
+    RoboRightMtrSpeed(-80);
+    RoboLeftMtrSpeed(-100);
+    return SUCCESS;
+}

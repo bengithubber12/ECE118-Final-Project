@@ -9,15 +9,22 @@
 
 #include "BOARD.h"
 #include "AD.h"
-//Function(s) To move Right and left robo motors
-int RoboLeftMtrSpeed(int speed);
-int RoboRightMtrSpeed(int speed);
-
-//Turn Functions
-int RoboRightTankTurn(int speed);
-int RoboLeftTankTurn(int speed);
 
 //Initialization Function for the Robot and Respective Components
 void ROBO_Init(void);
+
+//Functions to move robo motors
+int RoboLeftMtrSpeed(int speed);
+int RoboRightMtrSpeed(int speed);
+
+//Turn Functions where robot stops in place
+int RoboRightTankTurn(int speed);
+int RoboLeftTankTurn(int speed);
+
+//Moving Turn Functions
+int RoboForwardLeftTurn();
+int RoboForwardRightTurn();
+int RoboBackLeftTurn();
+int RoboBackRightTurn();
 
 #endif
