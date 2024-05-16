@@ -14,54 +14,57 @@
 
 #define ROBOT_RIGHT_PWM PWM_PORTY12
 #define ROBOT_LEFT_PWM PWM_PORTY04
-#define ROBOT_RIGHT_DIR PORTV04_LAT
-#define ROBOT_RIGHT_DIR_INV PORTV07_LAT
-#define ROBOT_LEFT_DIR PORTV03_LAT
-#define ROBOT_LEFT_DIR_INV PORTV05_LAT
+#define ROBOT_RIGHT_DIR PORTW03_LAT
+#define ROBOT_RIGHT_DIR_INV PORTW04_LAT
+#define ROBOT_LEFT_DIR PORTW07_LAT
+#define ROBOT_LEFT_DIR_INV PORTW08_LAT
 
 
-#define ROBOT_RIGHT_DIR_TRIS PORTV04_TRIS
-#define ROBOT_RIGHT_DIR_INV_TRIS PORTV07_TRIS
-#define ROBOT_LEFT_DIR_TRIS PORTV03_TRIS
-#define ROBOT_LEFT_DIR_INV_TRIS PORTV05_TRIS
+#define ROBOT_RIGHT_DIR_TRIS PORTW03_TRIS
+#define ROBOT_RIGHT_DIR_INV_TRIS PORTW04_TRIS
+#define ROBOT_LEFT_DIR_TRIS PORTW07_TRIS
+#define ROBOT_LEFT_DIR_INV_TRIS PORTW08_TRIS
 
 
 /////* PRIVATE FUNCTIONS */////
-int RoboLeftMtrSpeed(int speed){
-    if (speed <  (-1 * ROBOT_MAXSPEED) || speed > ROBOT_MAXSPEED){
+int RoboLeftMtrSpeed(int leftSpeed){
+    if (leftSpeed <  (-1 * ROBOT_MAXSPEED) || leftSpeed > ROBOT_MAXSPEED){
         //Error with speed bounds!
         return ERROR;
     }
-    if (speed < 0){
+    if (leftSpeed < 0){
         ROBOT_LEFT_DIR = 0;
-        speed *= -1;
+        leftSpeed *= -1;
+        printf("Left Motor less than 0\r\n");
     }
     else{
         ROBOT_LEFT_DIR = 1;
         
     }
     ROBOT_LEFT_DIR_INV = ~ROBOT_LEFT_DIR;
-    if (PWM_SetDutyCycle(ROBOT_LEFT_PWM, (speed * (MAX_PWM / ROBOT_MAXSPEED))) == ERROR){
+    printf("LEFT DIR IS %d\r\nLEFT DIR INVERSE IS %d\r\n",ROBOT_LEFT_DIR,ROBOT_LEFT_DIR_INV);
+    if (PWM_SetDutyCycle(ROBOT_LEFT_PWM, (leftSpeed * (MAX_PWM / ROBOT_MAXSPEED))) == ERROR){
         return ERROR;
     }
     return SUCCESS;
     
 }
 
-int RoboRightMtrSpeed(int speed){
-    if (speed <  (-1 * ROBOT_MAXSPEED) || speed > ROBOT_MAXSPEED){
+int RoboRightMtrSpeed(int rightSpeed){
+    if (rightSpeed <  (-1 * ROBOT_MAXSPEED) || rightSpeed > ROBOT_MAXSPEED){
         //Error with speed bounds!
         return ERROR;
     }
-    if (speed < 0){
+    if (rightSpeed < 0){
         ROBOT_RIGHT_DIR = 0;
-        speed *= -1;
+        rightSpeed *= -1;
+        
     }
     else{
         ROBOT_RIGHT_DIR = 1;
     }
     ROBOT_RIGHT_DIR_INV = ~ROBOT_RIGHT_DIR;
-    if (PWM_SetDutyCycle(ROBOT_RIGHT_PWM, (speed * (MAX_PWM / ROBOT_MAXSPEED))) == ERROR){
+    if (PWM_SetDutyCycle(ROBOT_RIGHT_PWM, (rightSpeed * (MAX_PWM / ROBOT_MAXSPEED))) == ERROR){
         return ERROR;
     }
     return SUCCESS;
@@ -76,7 +79,7 @@ void ROBO_Init(void) {
     ROBOT_RIGHT_DIR_TRIS = 0;
     ROBOT_RIGHT_DIR_INV_TRIS = 0;
     ROBOT_LEFT_DIR_TRIS = 0;
-    ROBOT_RIGHT_DIR_INV_TRIS =  0;
+    ROBOT_LEFT_DIR_INV_TRIS =  0;
     //Initialize Board, AD Ports, and PWM Ports
 
 }
