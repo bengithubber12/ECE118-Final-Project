@@ -70,6 +70,28 @@ int RoboRightMtrSpeed(int rightSpeed){
     return SUCCESS;
 }
 
+int RoboRightTankTurn(int speed){
+     if (speed <  (-1 * ROBOT_MAXSPEED) || speed > ROBOT_MAXSPEED){
+        //Error with speed bounds!
+        return ERROR;
+    }
+    //call motor functions, EXACT AMOUNTS TBD
+    RoboRightMtrSpeed(speed);
+    RoboLeftMtrSpeed(-1*speed);
+    return SUCCESS;
+}
+
+int RoboLeftTankTurn(int speed){
+     if (speed <  (-1 * ROBOT_MAXSPEED) || speed > ROBOT_MAXSPEED){
+        //Error with speed bounds!
+        return ERROR;
+    }
+    //call motor functions, EXACT AMOUNTS TBD
+    RoboRightMtrSpeed(-1*speed);
+    RoboLeftMtrSpeed(speed);
+    return SUCCESS;
+}
+
 void ROBO_Init(void) {
     //Initialize Robot Motors
     ROBOT_RIGHT_DIR = 0;

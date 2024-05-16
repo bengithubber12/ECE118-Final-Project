@@ -28,14 +28,28 @@ int main(void) {
     PWM_AddPins(PWM_PORTY04);
     
     LED_AddBanks(LED_BANK1);
+    int k, j, z;
     
     //AD_AddPins(AD_PORTW6);
     //AD_AddPins(AD_PORTW4);
     //AD_AddPins(AD_PORTW3);
     //AD_AddPins(AD_PORTW5);
     //int time = ES_Timer_GetTime();
-    int state = 0;
-    while(1){
+    //int state = 0;
+    
+    for (k = 0; k < 5000; k++) {
+        RoboLeftTankTurn(100);
+    }
+    for(j =0; j <2000; j++){
+        asm("nop");
+    }
+    for (z = 0; z < 5000; z++) {
+        RoboRightTankTurn(100);
+    }
+    RoboLeftMtrSpeed(0);
+    RoboRightMtrSpeed(0);
+    /*
+     * while(1){
        /*
        uint16_t topRight=  AD_ReadADPin(AD_PORTW6);
        uint16_t right=  AD_ReadADPin(AD_PORTW4);
@@ -53,13 +67,14 @@ int main(void) {
        } else {
            LED_SetBank(LED_BANK1, 0x0);
        }
-        * */
+        *
        //printf("TopRight: %d\r\n", topRight);
        //printf("Right: %d\r\n", right);
        //printf("TopLeft: %d\r\n", topLeft);
        //printf("Left: %d\r\n", left);
         RoboLeftMtrSpeed(100);
         RoboRightMtrSpeed(-100);
-    }
+        }*/
+    
     return 0;
 }

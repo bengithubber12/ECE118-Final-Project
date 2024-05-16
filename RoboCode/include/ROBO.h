@@ -13,6 +13,10 @@
 int RoboLeftMtrSpeed(int speed);
 int RoboRightMtrSpeed(int speed);
 
+//Turn Functions
+int RoboRightTankTurn(int speed);
+int RoboLeftTankTurn(int speed);
+
 //Initialization Function for the Robot and Respective Components
 void ROBO_Init(void);
 
