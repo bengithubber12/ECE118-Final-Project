@@ -4,11 +4,13 @@
  *
  * Created on May 14, 2024, 8:15 PM
  */
-#ifndef ROBO_MOVE_H
-#define ROBO_MOVE_H
+#ifndef ROBO_H
+#define ROBO_H
 
-#include "BOARD.h"
-#include "AD.h"
+//#include "BOARD.h"
+//#include "AD.h"
+#include "ES_Configure.h"
+
 
 //Initialization Function for the Robot and Respective Components
 void ROBO_Init(void);
@@ -17,14 +19,14 @@ void ROBO_Init(void);
 int RoboLeftMtrSpeed(int speed);
 int RoboRightMtrSpeed(int speed);
 
-//Turn Functions where robot stops in place
-int RoboRightTankTurn(int speed);
-int RoboLeftTankTurn(int speed);
-
-//Moving Turn Functions
-int RoboForwardLeftTurn();
-int RoboForwardRightTurn();
-int RoboBackLeftTurn();
-int RoboBackRightTurn();
+////Turn Functions where robot stops in place
+//int RoboRightTankTurn(int speed);
+//int RoboLeftTankTurn(int speed);
+//
+////Moving Turn Functions
+//int RoboForwardLeftTurn();
+//int RoboForwardRightTurn();
+//int RoboBackLeftTurn();
+//int RoboBackRightTurn();
 
 #endif

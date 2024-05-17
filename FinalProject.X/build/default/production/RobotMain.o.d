@@ -1,5 +1,5 @@
-build/default/production/TapeService.o: TapeService.c \
- ../ECE118/include/BOARD.h ../ECE118/include/AD.h ES_Configure.h \
+build/default/production/RobotMain.o: RobotMain.c \
+ ../ECE118/include/BOARD.h ROBO.h ES_Configure.h \
  ../ECE118/include/ES_Framework.h ../ECE118/include/ES_Events.h \
  ../ECE118/include/ES_Timers.h ../ECE118/include/ES_CheckEvents.h \
  ../ECE118/include/ES_General.h ../ECE118/include/ES_KeyboardInput.h \
@@ -7,11 +7,11 @@ build/default/production/TapeService.o: TapeService.c \
  ../ECE118/include/ES_PostList.h ../ECE118/include/ES_PriorTables.h \
  ../ECE118/include/ES_Queue.h ../ECE118/include/ES_ServiceHeaders.h \
  ES_Configure.h TapeService.h ES_Configure.h \
- ../ECE118/include/ES_TattleTale.h TapeService.h ROBO.h
+ ../ECE118/include/ES_TattleTale.h
 
 ../ECE118/include/BOARD.h:
 
-../ECE118/include/AD.h:
+ROBO.h:
 
 ES_Configure.h:
 
@@ -46,7 +46,3 @@ TapeService.h:
 ES_Configure.h:
 
 ../ECE118/include/ES_TattleTale.h:
-
-TapeService.h:
-
-ROBO.h:

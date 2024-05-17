@@ -9,6 +9,8 @@
 #include "ROBO.h"
 #include <stdio.h>
 #include "IO_Ports.h"
+#include "AD.h"
+#include "serial.h"
 /////* PRIVATE DEFINITIONS */////
 #define ROBOT_MAXSPEED 100
 
@@ -29,6 +31,9 @@
 /////* PRIVATE FUNCTIONS */////
 void ROBO_Init(void) {
     //Initialize Robot Motors
+    PWM_Init();
+    PWM_AddPins(ROBOT_RIGHT_PWM|ROBOT_LEFT_PWM);
+    
     ROBOT_RIGHT_DIR = 0;
     ROBOT_RIGHT_DIR_INV = ~ROBOT_RIGHT_DIR;
     ROBOT_LEFT_DIR = 0;
@@ -37,6 +42,14 @@ void ROBO_Init(void) {
     ROBOT_RIGHT_DIR_INV_TRIS = 0;
     ROBOT_LEFT_DIR_TRIS = 0;
     ROBOT_LEFT_DIR_INV_TRIS =  0;
+    
+    //Setup tape sensors pins
+    AD_Init();
+    AD_AddPins(AD_PORTW6);
+    AD_AddPins(AD_PORTW5);
+    AD_AddPins(AD_PORTW4);
+    AD_AddPins(AD_PORTW3);
+    
 }
 
 int RoboLeftMtrSpeed(int leftSpeed){
@@ -77,55 +90,5 @@ int RoboRightMtrSpeed(int rightSpeed){
     if (PWM_SetDutyCycle(ROBOT_RIGHT_PWM, (rightSpeed * (MAX_PWM / ROBOT_MAXSPEED))) == ERROR){
         return ERROR;
     }
-    return SUCCESS;
-}
-
-int RoboRightTankTurn(int speed){
-     if (speed <  (-1 * ROBOT_MAXSPEED) || speed > ROBOT_MAXSPEED){
-        //Error with speed bounds!
-        return ERROR;
-    }
-    //call motor functions, EXACT AMOUNTS TBD
-    RoboRightMtrSpeed(speed);
-    RoboLeftMtrSpeed(-1*speed);
-    return SUCCESS;
-}
-
-int RoboLeftTankTurn(int speed){
-     if (speed <  (-1 * ROBOT_MAXSPEED) || speed > ROBOT_MAXSPEED){
-        //Error with speed bounds!
-        return ERROR;
-    }
-    //call motor functions, EXACT AMOUNTS TBD
-    RoboRightMtrSpeed(-1*speed);
-    RoboLeftMtrSpeed(speed);
-    return SUCCESS;
-}
-
-int RoboForwardLeftTurn() {
-    //call motor functions, EXACT AMOUNTS TBD
-    RoboRightMtrSpeed(100);
-    RoboLeftMtrSpeed(80);
-    return SUCCESS;
-}
-
-int RoboForwardRightTurn() {
-    //call motor functions, EXACT AMOUNTS TBD
-    RoboRightMtrSpeed(80);
-    RoboLeftMtrSpeed(100);
-    return SUCCESS;
-}
-
-int RoboBackLeftTurn() {
-    //call motor functions, EXACT AMOUNTS TBD
-    RoboRightMtrSpeed(-100);
-    RoboLeftMtrSpeed(-80);
-    return SUCCESS;
-}
-
-int RoboBackRightTurn() {
-    //call motor functions, EXACT AMOUNTS TBD
-    RoboRightMtrSpeed(-80);
-    RoboLeftMtrSpeed(-100);
     return SUCCESS;
 }

@@ -44,6 +44,7 @@ typedef enum {
     ES_TIMERACTIVE, /* signals that a timer has become active */
     ES_TIMERSTOPPED, /* signals that a timer has stopped*/
     /* User-defined events start here */
+    TAPE_STATUS_CHANGE,
     BATTERY_CONNECTED,
     BATTERY_DISCONNECTED,
     NUMBEROFEVENTS,
@@ -60,6 +61,7 @@ static const char *EventNames[] = {
 	"ES_TIMEOUT",
 	"ES_TIMERACTIVE",
 	"ES_TIMERSTOPPED",
+	"TAPE_STATUS_CHANGE",
 	"BATTERY_CONNECTED",
 	"BATTERY_DISCONNECTED",
 	"NUMBEROFEVENTS",
@@ -70,7 +72,7 @@ static const char *EventNames[] = {
 
 /****************************************************************************/
 // This are the name of the Event checking function header file.
-#define EVENT_CHECK_HEADER 
+#define EVENT_CHECK_HEADER "ES_Configure.h"
 
 /****************************************************************************/
 // This is the list of event checking functions
@@ -82,7 +84,7 @@ static const char *EventNames[] = {
 // a timers, then you can use TIMER_UNUSED
 #define TIMER_UNUSED ((pPostFunc)0)
 #define TIMER0_RESP_FUNC TIMER_UNUSED
-#define TIMER1_RESP_FUNC TIMER_UNUSED
+#define TIMER1_RESP_FUNC PostTapeService
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
 #define TIMER4_RESP_FUNC TIMER_UNUSED
@@ -106,7 +108,7 @@ static const char *EventNames[] = {
 // the timer number matches where the timer event will be routed
 
 #define GENERIC_NAMED_TIMER 0 /*make sure this is enabled above and posting to the correct state machine*/
-
+#define TAPE_SERVICE_TIMER 1
 
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of 
@@ -117,7 +119,7 @@ static const char *EventNames[] = {
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 1
+#define NUM_SERVICES 2
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service
@@ -137,11 +139,11 @@ static const char *EventNames[] = {
 // These are the definitions for Service 1
 #if NUM_SERVICES > 1
 // the header file with the public fuction prototypes
-#define SERV_1_HEADER "TestService.h"
+#define SERV_1_HEADER "TapeService.h"
 // the name of the Init function
-#define SERV_1_INIT TestServiceInit
+#define SERV_1_INIT InitTapeService
 // the name of the run function
-#define SERV_1_RUN TestServiceRun
+#define SERV_1_RUN RunTapeService
 // How big should this services Queue be?
 #define SERV_1_QUEUE_SIZE 3
 #endif
