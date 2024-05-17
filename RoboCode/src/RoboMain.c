@@ -18,26 +18,45 @@
 #include "LED.h"
 
 
-int main(void) {
-    ROBO_Init();
+#include <BOARD.h>
+#include "ROBO.h"
+#include <xc.h>
+#include <stdio.h>
+#include "ES_Configure.h"
+#include "ES_Framework.h"
+
+void main(void)
+{
+    ES_Return_t ErrorType;
+
     BOARD_Init();
-    AD_Init();
-    LED_Init();
-    PWM_Init();
-    PWM_AddPins(PWM_PORTY12);
-    PWM_AddPins(PWM_PORTY04);
-    
-    LED_AddBanks(LED_BANK1);
-    
-    //AD_AddPins(AD_PORTW6);
-    //AD_AddPins(AD_PORTW4);
-    //AD_AddPins(AD_PORTW3);
-    //AD_AddPins(AD_PORTW5);
-    //int time = ES_Timer_GetTime();
-    //int state = 0
- 
-    while(1){
-       /*
+    ROBO_Init();
+    printf("Starting ES Framework Template\r\n");
+    printf("using the 2nd Generation Events & Services Framework\r\n");
+
+
+    // Your hardware initialization function calls go here
+
+    // now initialize the Events and Services Framework and start it running
+    ErrorType = ES_Initialize();
+    if (ErrorType == Success) {
+        ErrorType = ES_Run();
+
+    }
+    //if we got to here, there was an error
+    switch (ErrorType) {
+    case FailedPointer:
+        printf("Failed on NULL pointer");
+        break;
+    case FailedInit:
+        printf("Failed Initialization");
+        break;
+    default:
+        printf("Other Failure: %d", ErrorType);
+        break;
+    }
+    while (1){
+           /*
        uint16_t topRight=  AD_ReadADPin(AD_PORTW6);
        uint16_t right=  AD_ReadADPin(AD_PORTW4);
        uint16_t topLeft=  AD_ReadADPin(AD_PORTW3);
@@ -59,8 +78,8 @@ int main(void) {
        //printf("Right: %d\r\n", right);
        //printf("TopLeft: %d\r\n", topLeft);
        //printf("Left: %d\r\n", left);
-       RoboBackLeftTurn();
-     }
-    
-    return 0;
-}
+       //RoboBackLeftTurn();
+    }
+
+};
+

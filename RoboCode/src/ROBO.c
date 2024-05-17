@@ -9,6 +9,8 @@
 #include "ROBO.h"
 #include <stdio.h>
 #include "IO_Ports.h"
+#include "AD.h"
+#include "serial.h"
 /////* PRIVATE DEFINITIONS */////
 #define ROBOT_MAXSPEED 100
 
@@ -29,6 +31,9 @@
 /////* PRIVATE FUNCTIONS */////
 void ROBO_Init(void) {
     //Initialize Robot Motors
+    PWM_Init();
+    PWM_AddPins(ROBOT_RIGHT_PWM|ROBOT_LEFT_PWM);
+    
     ROBOT_RIGHT_DIR = 0;
     ROBOT_RIGHT_DIR_INV = ~ROBOT_RIGHT_DIR;
     ROBOT_LEFT_DIR = 0;
@@ -37,6 +42,14 @@ void ROBO_Init(void) {
     ROBOT_RIGHT_DIR_INV_TRIS = 0;
     ROBOT_LEFT_DIR_TRIS = 0;
     ROBOT_LEFT_DIR_INV_TRIS =  0;
+    
+    //Setup tape sensors pins
+    AD_Init();
+    AD_AddPins(AD_PORTW6);
+    AD_AddPins(AD_PORTW5);
+    AD_AddPins(AD_PORTW4);
+    AD_AddPins(AD_PORTW3);
+    
 }
 
 int RoboLeftMtrSpeed(int leftSpeed){
