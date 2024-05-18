@@ -27,12 +27,12 @@
 #include "ROBO.h"
 
 #define TIMER_1_TICKS 5
-#define TAPE_FRB_THRESHOLD 100 // front right back
-#define TAPE_FRF_THRESHOLD 100 // front right front 
-#define TAPE_FLB_THRESHOLD 100  // front left back
-#define TAPE_FLF_THRESHOLD 100  // front left front
-#define TAPE_BR_THRESHOLD 100    // back right
-#define TAPE_BL_THRESHOLD 100   // back left
+#define TAPE_FRB_THRESHOLD 105 // front right back
+#define TAPE_FRF_THRESHOLD 105 // front right front 
+#define TAPE_FLB_THRESHOLD 105  // front left back
+#define TAPE_FLF_THRESHOLD 105  // front left front
+#define TAPE_BR_THRESHOLD 105   // back right
+#define TAPE_BL_THRESHOLD 105   // back left
 
 static uint8_t MyPriority;
 
@@ -43,6 +43,12 @@ uint8_t InitTapeService(uint8_t Priority)
     ES_Event ThisEvent;
 
     MyPriority = Priority;
+    //Setup tape sensors pins
+    AD_Init();
+    AD_AddPins(AD_PORTW6);
+    AD_AddPins(AD_PORTW5);
+    AD_AddPins(AD_PORTW4);
+    AD_AddPins(AD_PORTW3);
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -64,13 +70,13 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
     ReturnEvent.EventType = ES_NO_EVENT;
     static uint8_t lastEvent  = 0x00;
     uint8_t curEvent;
-    uint16_t TapeFrontRightBack = AD_ReadADPin(AD_PORTW6);
+    uint16_t TapeRight = AD_ReadADPin(AD_PORTW6);
     //printf("FrontRightBack:%d\r\n", TapeFrontRightBack);
-    uint16_t TapeFrontRightFront = AD_ReadADPin(AD_PORTW5);
+    uint16_t TapeTopRight = AD_ReadADPin(AD_PORTW5);
     //printf("FrontRightFront:%d\r\n", TapeFrontRightFront);
-    uint16_t TapeFrontLeftBack = AD_ReadADPin(AD_PORTW4);
+    uint16_t TapeLeft = AD_ReadADPin(AD_PORTW4);
     //printf("FrontLeftBack:%d\r\n", TapeFrontLeftBack);
-    uint16_t TapeFrontLeftFront = AD_ReadADPin(AD_PORTW3);
+    uint16_t TapeTopLeft = AD_ReadADPin(AD_PORTW3);
     //printf("FrontLeftFront:%d\r\n", TapeFrontLeftFront);
     switch(ThisEvent.EventType){
         case ES_INIT:
@@ -83,30 +89,38 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
         ES_Timer_InitTimer(TAPE_SERVICE_TIMER, TIMER_1_TICKS); // runs every 5ms
         curEvent = 0x00;
             // check for Front Left Back Tape
-            if (TapeFrontLeftBack < TAPE_FLB_THRESHOLD) {
+            if (TapeLeft < TAPE_FLB_THRESHOLD) {
+                //printf("Left reading: %d\r\n", TapeLeft);
                 curEvent |= (1 << 0); 
             } else {
+                //printf("Left reading: %d\r\n", TapeLeft);
                 curEvent  &= ~(1<<0);
             }
 
             // check for Front Left Front Tape
-            if (TapeFrontLeftFront < TAPE_FLF_THRESHOLD) {
+            if (TapeTopLeft < TAPE_FLF_THRESHOLD) {
+                //printf("Top Left reading: %d\r\n", TapeTopLeft);
                 curEvent |= (1 << 1); 
             } else {
+                //printf("Top Left reading: %d\r\n", TapeTopLeft);
                 curEvent &= ~(1<<1);
             }
 
             // check for Front Right Front Tape
-            if (TapeFrontRightFront < TAPE_FRF_THRESHOLD) {
+            if (TapeTopRight < TAPE_FRF_THRESHOLD) {
+                //printf("Top Right reading: %d\r\n", TapeTopRight);
                 curEvent |= (1 << 2); 
             } else {
+                //printf("Top Right reading: %d\r\n", TapeTopRight);
                 curEvent &= ~(1<<2);
             }
 
             // check for Front Right Back Tape
-            if (TapeFrontRightBack < TAPE_FRB_THRESHOLD) {
+            if (TapeRight < TAPE_FRB_THRESHOLD) {
+                //printf("Right reading: %d\r\n", TapeRight);
                 curEvent |= (1 << 3); 
             } else {
+                //printf("Right reading: %d\r\n", TapeRight);
                 curEvent &= ~(1<<3);
             }
         //printf("\r\nHex Val: 0x%X", curEvent);
@@ -130,7 +144,8 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
                 ReturnEvent.EventParam = curEvent;
               
                 lastEvent = curEvent;
-                PostTapeService(ReturnEvent);
+                PostRoboTopHSM(ReturnEvent);
+                //PostTapeService(ReturnEvent);
             }
             break;
 

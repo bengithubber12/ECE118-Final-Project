@@ -7,9 +7,9 @@ build/default/production/_ext/70233818/ES_KeyboardInput.o: \
  ../ECE118/include/ES_LookupTables.h ../ECE118/include/ES_Port.h \
  ../ECE118/include/ES_PostList.h ../ECE118/include/ES_PriorTables.h \
  ../ECE118/include/ES_Queue.h ../ECE118/include/ES_ServiceHeaders.h \
- TapeService.h ES_Configure.h ../ECE118/include/ES_TattleTale.h \
- ../ECE118/include/ES_TattleTale.h ../ECE118/include/ES_KeyboardInput.h \
- ../ECE118/include/serial.h
+ TapeService.h ES_Configure.h ../ECE118/include/RoboHSM.h \
+ ../ECE118/include/ES_TattleTale.h ../ECE118/include/ES_TattleTale.h \
+ ../ECE118/include/ES_KeyboardInput.h ../ECE118/include/serial.h
 
 ../ECE118/include/BOARD.h:
 
@@ -42,6 +42,8 @@ ES_Configure.h:
 TapeService.h:
 
 ES_Configure.h:
+
+../ECE118/include/RoboHSM.h:
 
 ../ECE118/include/ES_TattleTale.h:
 

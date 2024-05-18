@@ -3,7 +3,8 @@ build/default/production/_ext/70233818/ES_PostList.o: \
  ES_Configure.h ../ECE118/include/ES_General.h \
  ../ECE118/include/ES_PostList.h ../ECE118/include/ES_Events.h \
  ../ECE118/include/ES_ServiceHeaders.h \
- ../ECE118/include/ES_KeyboardInput.h TapeService.h ES_Configure.h
+ ../ECE118/include/ES_KeyboardInput.h TapeService.h ES_Configure.h \
+ ../ECE118/include/RoboHSM.h
 
 ES_Configure.h:
 
@@ -20,3 +21,5 @@ ES_Configure.h:
 TapeService.h:
 
 ES_Configure.h:
+
+../ECE118/include/RoboHSM.h:
