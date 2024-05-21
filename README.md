@@ -20,5 +20,6 @@ PORT W3<-->Top Left Sensor <br />
 //Bumpers <br />
 PORT X3<-->Front Left <br />
 PORT X5<-->Front Right <br />
-PORT X4<-->Back <br />
+PORT X4<-->Back Left <br />
+PORT X6<-->Back Right <br />
 
