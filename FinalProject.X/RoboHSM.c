@@ -119,7 +119,7 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
 
         case ROAMING:
             ThisEvent = RunRoamSubHSM(ThisEvent);
-            printf("In Roaming Mode\r\n");
+            //printf("In Roaming Mode\r\n");
             switch (ThisEvent.EventType) {
                 case ES_NO_EVENT:
                     //nextState = ROAMING;
