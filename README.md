@@ -23,3 +23,5 @@ PORT X5<-->Front Right <br />
 PORT X4<-->Back Left <br />
 PORT X6<-->Back Right <br />
 
+//Track Wire </br>
+PORT V6<-->Analog Track Wire Output <br/>
