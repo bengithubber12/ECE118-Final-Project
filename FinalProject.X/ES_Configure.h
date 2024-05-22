@@ -46,6 +46,7 @@ typedef enum {
     /* User-defined events start here */
     TAPE_STATUS_CHANGE,
     BIAS_CHANGE,
+    BUMPER_STATUS_CHANGE,
     BATTERY_CONNECTED,
     BATTERY_DISCONNECTED,
     NUMBEROFEVENTS,
@@ -64,6 +65,7 @@ static const char *EventNames[] = {
 	"ES_TIMERSTOPPED",
 	"TAPE_STATUS_CHANGE",
 	"BIAS_CHANGE",
+	"BUMPER_STATUS_CHANGE",
 	"BATTERY_CONNECTED",
 	"BATTERY_DISCONNECTED",
 	"NUMBEROFEVENTS",
@@ -88,7 +90,7 @@ static const char *EventNames[] = {
 #define TIMER0_RESP_FUNC TIMER_UNUSED
 #define TIMER1_RESP_FUNC PostTapeService
 #define TIMER2_RESP_FUNC PostRoboTopHSM
-#define TIMER3_RESP_FUNC TIMER_UNUSED
+#define TIMER3_RESP_FUNC PostBumperService
 #define TIMER4_RESP_FUNC TIMER_UNUSED
 #define TIMER5_RESP_FUNC TIMER_UNUSED
 #define TIMER6_RESP_FUNC TIMER_UNUSED
@@ -110,7 +112,8 @@ static const char *EventNames[] = {
 // the timer number matches where the timer event will be routed
 
 #define GENERIC_NAMED_TIMER 0 /*make sure this is enabled above and posting to the correct state machine*/
-#define TAPE_SERVICE_TIMER 1
+#define TAPE_SERVICE_TIMER 3
+#define BUMPER_SERVICE_TIMER 1
 
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of 
@@ -121,7 +124,7 @@ static const char *EventNames[] = {
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 3
+#define NUM_SERVICES 4
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service
@@ -143,9 +146,9 @@ static const char *EventNames[] = {
 // the header file with the public fuction prototypes
 #define SERV_1_HEADER "TapeService.h"
 // the name of the Init function
-#define SERV_1_INIT InitTapeService
+#define SERV_1_INIT  InitTapeService
 // the name of the run function
-#define SERV_1_RUN RunTapeService
+#define SERV_1_RUN  RunTapeService
 // How big should this services Queue be?
 #define SERV_1_QUEUE_SIZE 3
 #endif
@@ -168,11 +171,11 @@ static const char *EventNames[] = {
 // These are the definitions for Service 3
 #if NUM_SERVICES > 3
 // the header file with the public fuction prototypes
-#define SERV_3_HEADER "TestService.h"
+#define SERV_3_HEADER "BumperService.h"
 // the name of the Init function
-#define SERV_3_INIT TestServiceInit
+#define SERV_3_INIT InitBumperService
 // the name of the run function
-#define SERV_3_RUN TestServiceRun
+#define SERV_3_RUN RunBumperService
 // How big should this services Queue be?
 #define SERV_3_QUEUE_SIZE 3
 #endif

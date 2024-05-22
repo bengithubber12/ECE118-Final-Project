@@ -27,12 +27,12 @@
 #include "ROBO.h"
 
 #define TIMER_1_TICKS 5
-#define TAPE_FRB_THRESHOLD 105 // front right back
-#define TAPE_FRF_THRESHOLD 105 // front right front 
-#define TAPE_FLB_THRESHOLD 105  // front left back
-#define TAPE_FLF_THRESHOLD 105  // front left front
-#define TAPE_BR_THRESHOLD 105   // back right
-#define TAPE_BL_THRESHOLD 105   // back left
+#define TAPE_RIGHT_THRESHOLD 105    //right
+#define TAPE_FR_THRESHOLD 105       //front right  
+#define TAPE_LEFT_THRESHOLD 105     //left
+#define TAPE_FL_THRESHOLD 105       //front left 
+#define TAPE_BR_THRESHOLD 105       //back right
+#define TAPE_BL_THRESHOLD 105       //back left
 
 static uint8_t MyPriority;
 
@@ -86,10 +86,11 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
         case ES_TIMERSTOPPED:
             break;
         case ES_TIMEOUT:
-        ES_Timer_InitTimer(TAPE_SERVICE_TIMER, TIMER_1_TICKS); // runs every 5ms
-        curEvent = 0x00;
-            // check for Front Left Back Tape
-            if (TapeLeft < TAPE_FLB_THRESHOLD) {
+            ES_Timer_InitTimer(TAPE_SERVICE_TIMER, TIMER_1_TICKS); // runs every 5ms
+            curEvent = 0x00;
+            
+            // check for Left Tape
+            if (TapeLeft < TAPE_LEFT_THRESHOLD) {
                 //printf("Left reading: %d\r\n", TapeLeft);
                 curEvent |= (1 << 0); 
             } else {
@@ -97,8 +98,8 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
                 curEvent  &= ~(1<<0);
             }
 
-            // check for Front Left Front Tape
-            if (TapeTopLeft < TAPE_FLF_THRESHOLD) {
+            // check for Front Left Tape
+            if (TapeTopLeft < TAPE_FL_THRESHOLD) {
                 //printf("Top Left reading: %d\r\n", TapeTopLeft);
                 curEvent |= (1 << 1); 
             } else {
@@ -106,8 +107,8 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
                 curEvent &= ~(1<<1);
             }
 
-            // check for Front Right Front Tape
-            if (TapeTopRight < TAPE_FRF_THRESHOLD) {
+            // check for Front Right Tape
+            if (TapeTopRight < TAPE_FR_THRESHOLD) {
                 //printf("Top Right reading: %d\r\n", TapeTopRight);
                 curEvent |= (1 << 2); 
             } else {
@@ -115,8 +116,8 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
                 curEvent &= ~(1<<2);
             }
 
-            // check for Front Right Back Tape
-            if (TapeRight < TAPE_FRB_THRESHOLD) {
+            // check for Right Tape
+            if (TapeRight < TAPE_RIGHT_THRESHOLD) {
                 //printf("Right reading: %d\r\n", TapeRight);
                 curEvent |= (1 << 3); 
             } else {
