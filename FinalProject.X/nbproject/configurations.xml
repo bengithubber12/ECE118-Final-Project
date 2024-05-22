@@ -30,6 +30,9 @@
       <itemPath>TapeService.h</itemPath>
       <itemPath>ROBO.h</itemPath>
       <itemPath>BumperService.h</itemPath>
+      <itemPath>RoamSubHSM.h</itemPath>
+      <itemPath>RoboHSM.h</itemPath>
+      <itemPath>DepositSubHSM.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -61,6 +64,7 @@
       <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/FinalProject.X/RoboHSM.c</itemPath>
       <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/FinalProject.X/RoamSubHSM.c</itemPath>
       <itemPath>BumperService.c</itemPath>
+      <itemPath>DepositSubHSM.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
