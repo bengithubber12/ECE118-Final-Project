@@ -7,8 +7,8 @@ build/default/production/DepositSubHSM.o: DepositSubHSM.c ES_Configure.h \
  ../ECE118/include/ES_Queue.h ../ECE118/include/ES_ServiceHeaders.h \
  ES_Configure.h TapeService.h ES_Configure.h ../ECE118/include/RoboHSM.h \
  BumperService.h ../ECE118/include/ES_TattleTale.h \
- ../ECE118/include/BOARD.h ROBO.h RoboHSM.h DepositSubHSM.h TapeService.h \
- BumperService.h
+ ../ECE118/include/BOARD.h Motors.h RoboHSM.h DepositSubHSM.h \
+ TapeService.h BumperService.h
 
 ES_Configure.h:
 
@@ -50,7 +50,7 @@ BumperService.h:
 
 ../ECE118/include/BOARD.h:
 
-ROBO.h:
+Motors.h:
 
 RoboHSM.h:
 

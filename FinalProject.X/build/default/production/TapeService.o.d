@@ -7,7 +7,7 @@ build/default/production/TapeService.o: TapeService.c \
  ../ECE118/include/ES_PostList.h ../ECE118/include/ES_PriorTables.h \
  ../ECE118/include/ES_Queue.h ../ECE118/include/ES_ServiceHeaders.h \
  ES_Configure.h TapeService.h ES_Configure.h ../ECE118/include/RoboHSM.h \
- BumperService.h ../ECE118/include/ES_TattleTale.h TapeService.h ROBO.h
+ BumperService.h ../ECE118/include/ES_TattleTale.h TapeService.h Motors.h
 
 ../ECE118/include/BOARD.h:
 
@@ -53,4 +53,4 @@ BumperService.h:
 
 TapeService.h:
 
-ROBO.h:
+Motors.h:
