@@ -12,7 +12,8 @@
 #include "AD.h"
 #include "serial.h"
 /////* PRIVATE DEFINITIONS */////
-#define SPEED 100
+#define SPEEDRIGHT 90
+#define SPEEDLEFT 85
 #define FORWARD 1
 #define BACKWARD -1
 #define ROBOT_MAXSPEED 100
@@ -89,48 +90,53 @@ int RoboRightMtrSpeed(int rightSpeed){
 }
 
 void run(void) {
-    RoboLeftMtrSpeed(FORWARD * SPEED);
-    RoboRightMtrSpeed(FORWARD * SPEED);
+    RoboLeftMtrSpeed(FORWARD * SPEEDLEFT);
+    RoboRightMtrSpeed(FORWARD * SPEEDRIGHT);
 }
 
 void goBackward(void) {
-    RoboLeftMtrSpeed(BACKWARD * SPEED);
-    RoboRightMtrSpeed(BACKWARD * SPEED);
+    RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
+    RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
 }
 
 void tankTurnRight(void) {
-    RoboLeftMtrSpeed(FORWARD * SPEED);
-    RoboRightMtrSpeed(BACKWARD * SPEED);
+    RoboLeftMtrSpeed(FORWARD * SPEEDLEFT);
+    RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
 }
 
 void tankTurnLeft(void) {
-    RoboLeftMtrSpeed(BACKWARD * SPEED);
-    RoboRightMtrSpeed(FORWARD * SPEED);
+    RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
+    RoboRightMtrSpeed(FORWARD * SPEEDRIGHT);
 }
 
 void hardTurnRight(void) {
-    RoboLeftMtrSpeed(75 * SPEED);
-    RoboRightMtrSpeed(BACKWARD * SPEED);
+    RoboLeftMtrSpeed(75 * SPEEDLEFT);
+    RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
 }
 
 void hardTurnLeft(void) {
-    RoboLeftMtrSpeed(BACKWARD * SPEED);
-    RoboRightMtrSpeed(75 * SPEED);
+    RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
+    RoboRightMtrSpeed(75 * SPEEDRIGHT);
 }
 
 void pivotBackRight(void) {
-    RoboLeftMtrSpeed(BACKWARD * SPEED);
+    RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
     RoboRightMtrSpeed(0);
 }
 
 void pivotBackLeft(void) {
     RoboLeftMtrSpeed(0);
-    RoboRightMtrSpeed(BACKWARD * SPEED);
+    RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
 }
 
 void stop(void) {
     RoboLeftMtrSpeed(0);
     RoboRightMtrSpeed(0);
+}
+
+void slightRightDrive(void) {
+    RoboLeftMtrSpeed(SPEEDLEFT);
+    RoboRightMtrSpeed(80);
 }
 
 void roboSway(uint8_t bias){

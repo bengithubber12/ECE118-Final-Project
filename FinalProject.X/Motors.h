@@ -27,6 +27,7 @@ void tankTurnRight(void);
 void hardTurnLeft(void);
 void hardTurnRight(void);
 void stop(void);
+void slightRightDrive(void);
 
 void roboSway(uint8_t bias);
 ////Turn Functions where robot stops in place
