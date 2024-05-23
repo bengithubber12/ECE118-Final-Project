@@ -187,46 +187,37 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent)
             
         //Determine which tape sensor is triggered
         if (ThisEvent.EventParam & LeftTape){// ONLY Left Tape Sensor Triggered
-            //RoboLeftMtrSpeed(-80);
-            //RoboRightMtrSpeed(100);
             pivotBackRight();
-            //ES_Timer_StartTimer(TURN_TIMER);
-            printf("Left Tape Sensor\r\n");
+            //printf("Left Tape Sensor\r\n");
         }
         else if (ThisEvent.EventParam & TopLeftTape){// ONLY TOP Left Triggered
-            //tank turn clockwise
-            //RoboLeftMtrSpeed(-80);
-            //RoboRightMtrSpeed(100);
             pivotBackRight();
-            //ES_Timer_StartTimer(TURN_TIMER);
-            printf("Top Left Tape Sensor\r\n");
+            //printf("Top Left Tape Sensor\r\n");
         }
         else if ((ThisEvent.EventParam & TopRightTape)){// ONLY TOP Right Tape Sensor Triggered
-            //small tank turn clockwise
-            //RoboLeftMtrSpeed(-85);
-            //RoboRightMtrSpeed(100);
-            //pivotBackRight();
             pivotBackRight();
-            //ES_Timer_StartTimer(TURN_TIMER);
-            printf("Top Right Tape Sensor\r\n");
+            //printf("Top Right Tape Sensor\r\n");
         }
         else if ((ThisEvent.EventParam & TopRightTape) && (ThisEvent.EventParam & RightTape) ){// Both Right Tape Triggered
-            //small tank turn clockwise
-            //RoboLeftMtrSpeed(-90);
-            //RoboRightMtrSpeed(100);
             pivotBackRight();
-            //ES_Timer_StartTimer(TURN_TIMER);
-            //pivotBackRight();
-            printf("Both Right Tape Sensors\r\n");
+            //printf("Both Right Tape Sensors\r\n");
         }
         else if (ThisEvent.EventParam & RightTape){// ONLY Right Triggered
             //Now matched with tape
             nextState = FOLLOW_TAPE;
             makeTransition = TRUE;
             ThisEvent.EventType = ES_NO_EVENT;
-            printf("Right Tape Sensor\r\n");
+            //printf("Right Tape Sensor\r\n");
         }
-        //break;
+        
+        // At a corner
+        else if (ThisEvent.EventParam == RightTape && (ThisEvent.EventParam == TopRightTape || ThisEvent.EventParam == TopLeftTape)){
+                    //Now matched with tape
+                    nextState = FOLLOW_TAPE;
+                    makeTransition = TRUE;
+                    ThisEvent.EventType = ES_NO_EVENT;
+                    //printf("Top Right Tape Sensor\r\n");
+                }
                 
         switch (ThisEvent.EventType) {
             case ES_ENTRY:
@@ -258,17 +249,12 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent)
         break;
         
     case FOLLOW_TAPE:
-        run();
+        slightRightDrive();
         switch (ThisEvent.EventType) {
             case TAPE_STATUS_CHANGE:
-                ES_Timer_InitTimer(ADJUST_TIMER, HALF_SECOND);
-                if (ThisEvent.EventParam == RightTape && (ThisEvent.EventParam == TopRightTape || ThisEvent.EventParam == TopLeftTape)){// At a corner
-                    //Now matched with tape
-                    nextState = FOLLOW_TAPE;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                    //printf("Top Right Tape Sensor\r\n");
-                }
+                nextState = ALINE;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
                 break;
         }
         
@@ -314,7 +300,7 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent)
             case ES_TIMEOUT: 
                 if (ThisEvent.EventParam == BUMPER_TIMER) {
                     //printf("Bumper timer done\r\n");
-                    nextState = FOLLOW_TAPE;
+                    nextState = FIND_TAPE;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
                 }
