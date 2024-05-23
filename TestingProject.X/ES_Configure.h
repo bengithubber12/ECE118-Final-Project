@@ -45,6 +45,7 @@ typedef enum {
     /* User-defined events start here */
     TAPE_STATUS_CHANGE,
     BEACON_STATUS_UPDATE,
+    TRACK_WIRE_STATUS_CHANGE,
     BUMPER_STATUS_CHANGE,
     BATTERY_CONNECTED,
     BATTERY_DISCONNECTED,
@@ -64,6 +65,7 @@ static const char *EventNames[] = {
 	"ES_TIMERSTOPPED",
 	"TAPE_STATUS_CHANGE",
 	"BEACON_STATUS_UPDATE",
+	"TRACK_WIRE_STATUS_CHANGE",
 	"BUMPER_STATUS_CHANGE",
 	"BATTERY_CONNECTED",
 	"BATTERY_DISCONNECTED",
@@ -92,8 +94,8 @@ static const char *EventNames[] = {
 #define TIMER3_RESP_FUNC PostBumperService
 #define TIMER4_RESP_FUNC PostRoboTopHSM
 #define TIMER5_RESP_FUNC PostBeaconService
-#define TIMER6_RESP_FUNC TIMER_UNUSED
-#define TIMER7_RESP_FUNC TIMER_UNUSED
+#define TIMER6_RESP_FUNC PostRoboTopHSM
+#define TIMER7_RESP_FUNC PostTWService
 #define TIMER8_RESP_FUNC TIMER_UNUSED
 #define TIMER9_RESP_FUNC TIMER_UNUSED
 #define TIMER10_RESP_FUNC TIMER_UNUSED
@@ -114,7 +116,8 @@ static const char *EventNames[] = {
 #define TAPE_SERVICE_TIMER 1
 #define BUMPER_SERVICE_TIMER 3
 #define BEACON_SERVICE_TIMER 5
-//#define INIT_POLL_TIMER 6
+#define INIT_POLL_TIMER 6
+#define TRACK_WIRE_SERVICE_TIMER 7
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of 
 // services that the framework will handle. Reasonable values are 8 and 16
@@ -124,7 +127,7 @@ static const char *EventNames[] = {
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 5
+#define NUM_SERVICES 6
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service
@@ -197,11 +200,11 @@ static const char *EventNames[] = {
 // These are the definitions for Service 5
 #if NUM_SERVICES > 5
 // the header file with the public fuction prototypes
-#define SERV_5_HEADER "TestService.h"
+#define SERV_5_HEADER "TrackWireService.h"
 // the name of the Init function
-#define SERV_5_INIT TestServiceInit
+#define SERV_5_INIT InitTWService
 // the name of the run function
-#define SERV_5_RUN TestServiceRun
+#define SERV_5_RUN RunTWService
 // How big should this services Queue be?
 #define SERV_5_QUEUE_SIZE 3
 #endif
