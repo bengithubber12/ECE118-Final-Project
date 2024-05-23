@@ -109,7 +109,7 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
             
             //Back Left Bumper
             if (bumperRead & BLEFT_BUMP_MASK) {
-               // printf("BLB Triggered.\r\n");
+                //printf("BLB Triggered.\r\n");
                 curEvent |= (1 << 3);
             } else {
                 curEvent &= ~(1 << 3);

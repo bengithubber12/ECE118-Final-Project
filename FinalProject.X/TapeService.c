@@ -71,13 +71,13 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
     static uint8_t lastEvent  = 0x00;
     uint8_t curEvent;
     uint16_t TapeRight = AD_ReadADPin(AD_PORTW6);
-    //printf("FrontRightBack:%d\r\n", TapeFrontRightBack);
+    //printf("TapeRight: %d\r\n", TapeRight);
     uint16_t TapeTopRight = AD_ReadADPin(AD_PORTW5);
-    //printf("FrontRightFront:%d\r\n", TapeFrontRightFront);
+    //printf("TapeTopRight: %d\r\n", TapeTopRight);
     uint16_t TapeLeft = AD_ReadADPin(AD_PORTW4);
-    //printf("FrontLeftBack:%d\r\n", TapeFrontLeftBack);
+    //printf("TapeLeft: %d\r\n", TapeLeft);
     uint16_t TapeTopLeft = AD_ReadADPin(AD_PORTW3);
-    //printf("FrontLeftFront:%d\r\n", TapeFrontLeftFront);
+    //printf("TapeTopLeft: %d\r\n", TapeTopLeft);
     switch(ThisEvent.EventType){
         case ES_INIT:
             break;

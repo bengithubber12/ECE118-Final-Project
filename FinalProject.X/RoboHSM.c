@@ -35,6 +35,7 @@
 #include "ROBO.h"
 #include "RoboHSM.h"
 #include "RoamSubHSM.h"
+#include "DepositSubHSM.h"
 //#include all sub state machines called
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
@@ -75,7 +76,7 @@ static uint8_t MyPriority;
 /**
  * @author J. Edward Carryer, 2011.10.23 19:25 */
 uint8_t InitRoboTopHSM(uint8_t Priority) {
-    printf("The Top HSM is init'ing...\r\n");
+    //printf("The Top HSM is init'ing...\r\n");
     MyPriority = Priority;
     // put us into the Initial PseudoState
     CurrentState = InitPState;
@@ -107,11 +108,11 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
             {
                 // Initialize all sub-state machines (NEED TO CREATE  SUB-STATE MACHINES)
                 InitRoamSubHSM();
-                //InitBumperSubHSM();
+                InitDepositSubHSM();
                 //InitBeaconSubHSM();
                 
                 // now put the machine into the actual initial state
-                nextState = ROAMING;
+                nextState = DEPOSITING;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
             }
@@ -121,6 +122,9 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
             ThisEvent = RunRoamSubHSM(ThisEvent);
             //printf("In Roaming Mode\r\n");
             switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    InitRoamSubHSM();
+                    break;
                 case ES_NO_EVENT:
                     //nextState = ROAMING;
                     //makeTransition = TRUE;
@@ -139,7 +143,11 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
             }
             break;
         case DEPOSITING:
+            ThisEvent = RunDepositSubHSM(ThisEvent);
             switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    InitDepositSubHSM();
+                    break;
                 case ES_NO_EVENT:
                     break;
                 default:
