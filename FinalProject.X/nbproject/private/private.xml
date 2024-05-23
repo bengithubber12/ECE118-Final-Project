@@ -3,14 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/RobotMain.c</file>
             <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/ES_Configure.h</file>
-            <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/RoamSubHSM.c</file>
-            <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/BumperService.c</file>
-            <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/ROBO.c</file>
             <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/RoboHSM.c</file>
-            <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/ECE118/include/ES_Timers.h</file>
             <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/TapeService.c</file>
+            <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/DepositSubHSM.c</file>
+            <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/BumperService.c</file>
+            <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/Motors.c</file>
+            <file>file:/C:/Users/jeemcast/OneDrive%20-%20ucsc.edu/FinalProject.X/Motors.h</file>
         </group>
     </open-files>
 </project-private>

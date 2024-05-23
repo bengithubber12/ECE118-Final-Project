@@ -106,7 +106,7 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
         case InitPState: // If current state is initial Pseudo State
             if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
             {
-                // Initialize all sub-state machines (NEED TO CREATE  SUB-STATE MACHINES)
+                // Initialize all sub-state machines
                 InitRoamSubHSM();
                 InitDepositSubHSM();
                 //InitBeaconSubHSM();
