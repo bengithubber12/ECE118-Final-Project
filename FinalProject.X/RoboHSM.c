@@ -112,7 +112,7 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                 //InitBeaconSubHSM();
                 
                 // now put the machine into the actual initial state
-                nextState = DEPOSITING;
+                nextState = ROAMING;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
             }
@@ -125,7 +125,15 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                 case ES_ENTRY:
                     InitRoamSubHSM();
                     break;
-                case ES_NO_EVENT:
+                case ES_TIMEOUT:
+                    if (ThisEvent.EventParam == ROAM_TIMER){
+                        //curMotorBias ^= 1;
+                        //roboSway(curMotorBias); 
+                        //printf("Tape timer done\r\n");
+                        nextState = DEPOSITING;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
                     //nextState = ROAMING;
                     //makeTransition = TRUE;
                     break;

@@ -114,6 +114,7 @@ static const char *EventNames[] = {
 #define GENERIC_NAMED_TIMER 0 /*make sure this is enabled above and posting to the correct state machine*/
 #define TAPE_SERVICE_TIMER 1
 #define BUMPER_SERVICE_TIMER 3
+#define ROAM_TIMER 4
 
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of 
