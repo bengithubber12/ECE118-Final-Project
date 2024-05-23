@@ -45,6 +45,7 @@ typedef enum {
     FIND_TAPE,
     ALINE,
     FOLLOW_TAPE,
+    CORNER_TURN,
     BUMPER_HANDLER,          
 } DepositSubHSMState_t;
 
@@ -53,6 +54,7 @@ static const char *StateNames[] = {
 	"FIND_TAPE",
 	"ALINE",
 	"FOLLOW_TAPE",
+	"CORNER_TURN",
 	"BUMPER_HANDLER",
 };
 
@@ -62,6 +64,7 @@ static const char *StateNames[] = {
 #define ONE_SECOND 1000
 #define ADJUST_TIMER 4
 #define BUMPER_TIMER 4
+#define TURN_TIMER 4
 
 //Tape Definitions
 #define LeftTape 1
@@ -213,7 +216,7 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent)
         // At a corner
         else if (ThisEvent.EventParam == RightTape && (ThisEvent.EventParam == TopRightTape || ThisEvent.EventParam == TopLeftTape)){
                     //Now matched with tape
-                    nextState = FOLLOW_TAPE;
+                    nextState = CORNER_TURN;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
                     //printf("Top Right Tape Sensor\r\n");
@@ -221,7 +224,6 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent)
                 
         switch (ThisEvent.EventType) {
             case ES_ENTRY:
-                printf("Timer inited\r\n");
                 ES_Timer_InitTimer(ADJUST_TIMER, HALF_SECOND);
                 break;
                 
@@ -259,7 +261,28 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent)
         }
         
         break;
+    
+    case CORNER_TURN:
+        tankTurnRight();
+        switch (ThisEvent.EventType) {
+            case ES_ENTRY:
+                ES_Timer_InitTimer(TURN_TIMER, HALF_SECOND);
+                break;
+                
+            case ES_EXIT:
+                ES_Timer_SetTimer(TURN_TIMER, HALF_SECOND);
+                break;
+                
+            case ES_TIMEOUT:
+                if (ThisEvent.EventParam == TURN_TIMER){
+                    nextState = FIND_TAPE;
+                    makeTransition = TRUE;
+                    ThisEvent.EventType = ES_NO_EVENT;
+                }
+                break;
+        }
         
+                
     case BUMPER_HANDLER:
         
         //Determine which bumper is triggered
