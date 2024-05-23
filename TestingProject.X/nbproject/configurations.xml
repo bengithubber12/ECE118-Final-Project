@@ -32,6 +32,8 @@
       <itemPath>RoamSubHSM.h</itemPath>
       <itemPath>RoboHSM.h</itemPath>
       <itemPath>TapeService.h</itemPath>
+      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/TestingProject.X/TrackWireService.h</itemPath>
+      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/TestingProject.X/BeaconService.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -63,6 +65,8 @@
       <itemPath>Motors.c</itemPath>
       <itemPath>DepositSubHSM.c</itemPath>
       <itemPath>BumperService.c</itemPath>
+      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/TestingProject.X/BeaconService.c</itemPath>
+      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/TestingProject.X/TrackWireService.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
