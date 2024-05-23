@@ -23,5 +23,6 @@ PORT X5<-->Front Right <br />
 PORT X4<-->Back Left <br />
 PORT X6<-->Back Right <br />
 
-//Track Wire </br>
+//Track Wire and Beacon </br>
 PORT V6<-->Analog Track Wire Output <br/>
+PORT W7<-->Analog Beacon Output <br/>
