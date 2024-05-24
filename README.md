@@ -3,7 +3,7 @@
 
 //Motor Enables for Wheels <br />
 PORT Y12<-->Robot Right Wheel PWM <br />
-PORT Y14<-->Robot Left Wheel PWM <br />
+PORT Y04<-->Robot Left Wheel PWM <br />
 
 //Motor Inputs for Wheels <br />
 PORT V04<-->Robot Right Dir <br />
