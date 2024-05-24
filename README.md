@@ -19,7 +19,8 @@ PORT W6<-->Right Sensor <br />
 PORT W5<-->Top Right Sensor <br />
 PORT W4<-->Left Sensor <br />
 PORT W3<-->Top Left Sensor <br />
-
+PORT W7 <--> Back Right Sensor <br />
+PORT W8 <--> Back Left Sensor <br />
 //Bumpers <br />
 PORT X3<-->Front Left <br />
 PORT X5<-->Front Right <br />
@@ -28,4 +29,4 @@ PORT X6<-->Back Right <br />
 
 //Track Wire and Beacon </br>
 PORT V6<-->Analog Track Wire Output <br/>
-PORT W7<-->Analog Beacon Output <br/>
+//PORT W7<-->Analog Beacon Output <br/>
