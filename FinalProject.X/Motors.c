@@ -18,6 +18,7 @@
 #define BACKWARD -1
 #define ROBOT_MAXSPEED 100
 
+//LEFT AND RIGHT MOTOR DEFINITIONS
 #define ROBOT_RIGHT_PWM PWM_PORTY12
 #define ROBOT_LEFT_PWM PWM_PORTY04
 #define ROBOT_RIGHT_DIR PORTV04_LAT
@@ -25,27 +26,37 @@
 #define ROBOT_LEFT_DIR PORTV03_LAT
 #define ROBOT_LEFT_DIR_INV PORTV05_LAT 
 
-
 #define ROBOT_RIGHT_DIR_TRIS PORTV04_TRIS
 #define ROBOT_RIGHT_DIR_INV_TRIS PORTV07_TRIS
 #define ROBOT_LEFT_DIR_TRIS PORTV03_TRIS
 #define ROBOT_LEFT_DIR_INV_TRIS PORTV05_TRIS
 
+//BELT DRIVE MOTOR DEFINITIONS
+#define BELT_DRIVE_PWM PWM_PORTZ06
+#define BELT_DRIVE_DIR PORTV06_LAT
+#define BELT_DRIVE_DIR_INV PORTV08_LAT
+
+#define BELT_DRIVE_DIR_TRIS PORTV06_TRIS
+#define BELT_DRIVE_DIR_INV_TRIS PORTV08_TRIS
 
 /////* PRIVATE FUNCTIONS */////
 void ROBO_Init(void) {
     //Initialize Robot Motors
     PWM_Init();
-    PWM_AddPins(ROBOT_RIGHT_PWM|ROBOT_LEFT_PWM);
+    PWM_AddPins(ROBOT_RIGHT_PWM|ROBOT_LEFT_PWM|BELT_DRIVE_PWM);
     
     ROBOT_RIGHT_DIR = 0;
     ROBOT_RIGHT_DIR_INV = ~ROBOT_RIGHT_DIR;
     ROBOT_LEFT_DIR = 0;
     ROBOT_LEFT_DIR_INV = ~ROBOT_LEFT_DIR;
+    BELT_DRIVE_DIR = 0;
+    BELT_DRIVE_DIR_INV = ~BELT_DRIVE_DIR;
     ROBOT_RIGHT_DIR_TRIS = 0;
     ROBOT_RIGHT_DIR_INV_TRIS = 0;
     ROBOT_LEFT_DIR_TRIS = 0;
     ROBOT_LEFT_DIR_INV_TRIS =  0; 
+    BELT_DRIVE_DIR_TRIS = 0;
+    BELT_DRIVE_DIR_INV_TRIS = 0;
 }
 
 int RoboLeftMtrSpeed(int leftSpeed){
@@ -84,6 +95,25 @@ int RoboRightMtrSpeed(int rightSpeed){
     }
     ROBOT_RIGHT_DIR_INV = ~ROBOT_RIGHT_DIR;
     if (PWM_SetDutyCycle(ROBOT_RIGHT_PWM, (rightSpeed * (MAX_PWM / ROBOT_MAXSPEED))) == ERROR){
+        return ERROR;
+    }
+    return SUCCESS;
+}
+
+int RoboBeltMtrSpeed(int beltSpeed){
+    if (beltSpeed <  (-1 * ROBOT_MAXSPEED) || beltSpeed > ROBOT_MAXSPEED){
+        //Error with speed bounds!
+        return ERROR;
+    }
+    if (beltSpeed < 0){
+        BELT_DRIVE_DIR = 0;
+        beltSpeed *= -1;
+    }
+    else{
+        BELT_DRIVE_DIR = 1;
+    }
+    BELT_DRIVE_DIR_INV = ~BELT_DRIVE_DIR;
+    if (PWM_SetDutyCycle(BELT_DRIVE_PWM, (beltSpeed * (MAX_PWM / ROBOT_MAXSPEED))) == ERROR){
         return ERROR;
     }
     return SUCCESS;
@@ -142,10 +172,14 @@ void slightRightDrive(void) {
 void roboSway(uint8_t bias){
     if (bias == 0){ //Left Sway
         RoboRightMtrSpeed(85);
-        RoboLeftMtrSpeed(100);
+        RoboLeftMtrSpeed(ROBOT_MAXSPEED);
     }
     else if (bias == 1){//Right Sway
-        RoboRightMtrSpeed(100);
+        RoboRightMtrSpeed(ROBOT_MAXSPEED);
         RoboLeftMtrSpeed(75);
     }
+}
+
+void beltDriveMax(void){
+    RoboBeltMtrSpeed(ROBOT_MAXSPEED * BACKWARD); //Backwards b/c the belt drive needs to roll  balls IN
 }
