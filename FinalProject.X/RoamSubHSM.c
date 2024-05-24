@@ -37,9 +37,25 @@
 #include "RoboHSM.h"
 #include "RoamSubHSM.h"
 #include <stdio.h>
+//#define TRACK_WIRE 1 //testing track wire, comment out if running normally
 /*******************************************************************************
  * MODULE #DEFINES                                                             *
  ******************************************************************************/
+
+#ifdef TRACK_WIRE 
+typedef enum {
+    InitPSubState,
+    TEST_TW,
+} RoamSubHSMState_t;
+
+static const char *StateNames[] = {
+	"InitPSubState",
+	"TEST_TW",
+};
+
+#endif
+
+#ifndef TRACK_WIRE
 typedef enum {
     InitPSubState,
     FREE_ROAM,
@@ -53,6 +69,7 @@ static const char *StateNames[] = {
 	"TAPE_HANDLER",
 	"BUMPER_HANDLER",
 };
+#endif
 
 //Timer Definitions
 #define QUARTER_SECOND 250
@@ -60,7 +77,7 @@ static const char *StateNames[] = {
 #define ONE_SECOND 1000
 #define TURN_TIMER 2
 #define BUMPER_TIMER 2
-#define ROAM_TIMER 90000 // 1 min 30 seconds
+#define ROAM_TIME 30000 // 1 min 30 seconds
 
 //Tape Definitions
 #define LeftTape 1
@@ -128,19 +145,29 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             {
                 //printf("Currently initializing free roam\r\n");
                 // now put the machine into the actual initial state
-                curMotorBias = 0; //Set the initial motor BIAS to left(0)
+                //curMotorBias = 1; //Set the initial motor BIAS to right(1)
+                ES_Timer_InitTimer(ROAM_TIMER, ROAM_TIME);
                 //roboSway(curMotorBias);
                 //run();
+#ifdef TRACK_WIRE
+                nextState = TEST_TW;
+#endif
+#ifndef TRACK_WIRE
                 nextState = FREE_ROAM;
+#endif
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
 
             }
             break;
+#ifdef TRACK_WIRE
+        case TEST_TW:
+            beltDriveMax();
+            break;
+#endif
+#ifndef TRACK_WIRE
         case FREE_ROAM: // in the first state, replace this with correct names
-            //printf("We in free roam\r\n");
-            //printf("The event is %d\r\n", ThisEvent.EventParam);
-            run(); // go forward
+            roboSway(curMotorBias); // right 
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
                     break;
@@ -167,19 +194,19 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             
             //Determine which tape sensor is triggered
             if (ThisEvent.EventParam == LeftTape){// ONLY Left Tape Sensor Triggered
-                pivotBackLeft();
+                pivotBackRight();
                 //printf("Front Left Tape Sensor\r\n");
             }
             else if ((ThisEvent.EventParam == TopLeftTape || ThisEvent.EventParam == BothLeftTape)){// Front TOP Left or (Top Left and Left) Triggered
-                pivotBackLeft();
+                tankTurnRight();
                 //printf("Top Left Tape Sensor\r\n");
             }
             else if ((ThisEvent.EventParam == TopRightTape)){// ONLY TOP Right Tape Sensor Triggered
-                pivotBackRight();
+                pivotBackLeft();
                 //printf("Front Right Tape Sensor\r\n");
             }
             else if (ThisEvent.EventParam == RightTape || ThisEvent.EventParam == BothRightTape){// Front TOP Right or (Top Right and Front Right) Triggered
-                pivotBackRight();
+                tankTurnLeft();
                 //printf("Top Right Tape Sensor\r\n");
             }
             else if ((ThisEvent.EventParam == BothTopTape) || ThisEvent.EventParam == AllFrontTape){ //Either All front tape sensors are triggered or just front tape sensors
@@ -188,11 +215,11 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(TURN_TIMER, HALF_SECOND);
+                    ES_Timer_InitTimer(TURN_TIMER, ONE_SECOND);
                     break;
                     
                 case ES_EXIT:
-                    ES_Timer_SetTimer(TURN_TIMER, HALF_SECOND);
+                    ES_Timer_SetTimer(TURN_TIMER, ONE_SECOND);
                     break;
                     
                 case ES_TIMEOUT:
@@ -247,11 +274,11 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(BUMPER_TIMER, HALF_SECOND);
+                    ES_Timer_InitTimer(BUMPER_TIMER, ONE_SECOND);
                     break;
                     
                 case ES_EXIT:
-                    ES_Timer_SetTimer(BUMPER_TIMER, HALF_SECOND);
+                    ES_Timer_SetTimer(BUMPER_TIMER, ONE_SECOND);
                     break;
                     
                 case ES_TIMEOUT: 
@@ -273,7 +300,7 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                     break;
             }
             break;
-            
+#endif
         default: // all unhandled states fall into here
             break;
     } // end switch on Current State
