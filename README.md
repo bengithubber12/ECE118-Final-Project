@@ -4,12 +4,15 @@
 //Motor Enables for Wheels <br />
 PORT Y12<-->Robot Right Wheel PWM <br />
 PORT Y04<-->Robot Left Wheel PWM <br />
+PORT Z06<-->Robot Belt Drive PWM <br />
 
 //Motor Inputs for Wheels <br />
 PORT V04<-->Robot Right Dir <br />
 PORT V07<-->Robot Right Dir Inv <br />
 PORT V03<-->Robot Left Dir <br />
 PORT V05<-->Robot Left Dir Inv <br />
+PORT V06<-->Robot Belt Drive <br />
+PORT V08<-->Robot Belt Drive Inv <br />
 
 //Tape Sensors <br />
 PORT W6<-->Right Sensor <br />
