@@ -7,8 +7,8 @@ build/default/production/BumperService.o: BumperService.c \
  ../ECE118/include/ES_PostList.h ../ECE118/include/ES_PriorTables.h \
  ../ECE118/include/ES_Queue.h ../ECE118/include/ES_ServiceHeaders.h \
  ES_Configure.h TapeService.h ES_Configure.h ../ECE118/include/RoboHSM.h \
- BumperService.h ../ECE118/include/ES_TattleTale.h BumperService.h \
- Motors.h
+ BumperService.h TrackWireService.h ../ECE118/include/ES_TattleTale.h \
+ BumperService.h Motors.h
 
 ../ECE118/include/BOARD.h:
 
@@ -49,6 +49,8 @@ ES_Configure.h:
 ../ECE118/include/RoboHSM.h:
 
 BumperService.h:
+
+TrackWireService.h:
 
 ../ECE118/include/ES_TattleTale.h:
 
