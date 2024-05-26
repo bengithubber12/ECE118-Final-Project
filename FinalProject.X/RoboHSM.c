@@ -130,7 +130,7 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                         //curMotorBias ^= 1;
                         //roboSway(curMotorBias); 
                         //printf("Tape timer done\r\n");
-                        nextState = DEPOSITING;
+                        nextState = ROAMING;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
