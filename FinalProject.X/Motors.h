@@ -18,6 +18,7 @@ void ROBO_Init(void);
 //Functions to move robo motors
 int RoboLeftMtrSpeed(int speed);
 int RoboRightMtrSpeed(int speed);
+int RoboBeltMtrSpeed(int beltSpeed);
 void run(void);
 void goBackward(void);
 void pivotBackLeft(void);
@@ -28,8 +29,8 @@ void hardTurnLeft(void);
 void hardTurnRight(void);
 void stop(void);
 void slightRightDrive(void);
-
 void roboSway(uint8_t bias);
+void beltDriveMax(void);
 ////Turn Functions where robot stops in place
 //int RoboRightTankTurn(int speed);
 //int RoboLeftTankTurn(int speed);

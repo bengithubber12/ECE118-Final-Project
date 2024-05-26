@@ -40,14 +40,10 @@ uint8_t InitBumperService(uint8_t Priority)
 
     MyPriority = Priority;
     //Setup bumper pins
-    //IO_PortsSetPortInputs(PORTX, PIN3);
-    //IO_PortsSetPortInputs(PORTX, PIN4);
-    //IO_PortsSetPortInputs(PORTX, PIN5);
-    //IO_PortsSetPortInputs(PORTX, PIN6);
-    PORTX03_TRIS = 1;  //front left
-    PORTX04_TRIS = 1;  //back left
-    PORTX05_TRIS = 1;  //front right
-    PORTX06_TRIS = 1;  //back right
+    PORTX10_TRIS = 1;  //front left
+    PORTX09_TRIS = 1;  //back left
+    PORTX06_TRIS = 1;  //front right
+    PORTX05_TRIS = 1;  //back right
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -70,7 +66,7 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
     uint8_t curEvent;
     
     //array of all readings 
-    unsigned char bumperRead = ((PORTX04_BIT << 3) | ((PORTX06_BIT << 2) | ((PORTX05_BIT << 1) | PORTX03_BIT)));
+    unsigned char bumperRead = ((PORTX09_BIT << 3) | ((PORTX05_BIT << 2) | ((PORTX06_BIT << 1) | PORTX10_BIT)));
     
     switch(ThisEvent.EventType){
         case ES_INIT:
