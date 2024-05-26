@@ -115,7 +115,7 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                 //InitBeaconSubHSM();
                 
                 // now put the machine into the actual initial state
-                nextState = ROAMING;
+                nextState = DEPOSITING;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
             }

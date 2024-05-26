@@ -67,14 +67,21 @@ static const char *StateNames[] = {
 #define TURN_TIMER 4
 
 //Tape Definitions
-#define LeftTape 1
-#define TopLeftTape 2
-#define BothLeftTape 3
-#define TopRightTape 4
-#define BothTopTape 6 
-#define RightTape 8
-#define BothRightTape 12
-#define AllFrontTape 15
+#define LeftTape 0x01
+#define TopLeftTape 0x02
+#define L_TL_Tape 0x03
+#define TopRightTape 0x04
+#define BothTopTape 0x06 
+#define RightTape 0x08
+#define TR_R_Tape 0x0C 
+#define AllTopSensors 0x0F
+#define BackRightTape 0x10
+#define BothRightTape 0x18
+#define AllRight 0x1C
+#define BackLeftTape 0x20
+#define BothLeftTape 0x21
+#define AllLeft 0x23
+#define BothBackTape 0x30
 
 //Bumper Definitions
 #define FLB 1
@@ -193,42 +200,44 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent)
             pivotBackRight();
             //printf("Left Tape Sensor\r\n");
         }
-        else if (ThisEvent.EventParam & TopLeftTape){// ONLY TOP Left Triggered
+        else if (ThisEvent.EventParam & TopLeftTape){// ONLY Top Left Triggered
             pivotBackRight();
             //printf("Top Left Tape Sensor\r\n");
         }
-        else if ((ThisEvent.EventParam & TopRightTape)){// ONLY TOP Right Tape Sensor Triggered
-            pivotBackRight();
+        else if ((ThisEvent.EventParam & TopRightTape)){ //ONLY Top Right Triggered
+            pivotForwardLeft();
             //printf("Top Right Tape Sensor\r\n");
         }
-        else if ((ThisEvent.EventParam & TopRightTape) && (ThisEvent.EventParam & RightTape) ){// Both Right Tape Triggered
+        else if ((ThisEvent.EventParam & BackLeftTape)){ //ONLY Back Left Triggered
+            pivotForwardRight();
+            //printf("Back Left Tape Sensor\r\n");
+        }
+        else if ((ThisEvent.EventParam & TopRightTape) && (ThisEvent.EventParam & RightTape)){// Both Right Tape Triggered
             pivotBackRight();
             //printf("Both Right Tape Sensors\r\n");
         }
-        else if (ThisEvent.EventParam & RightTape){// ONLY Right Triggered
+        else if (ThisEvent.EventParam & BothRightTape){// Right and BackRight tape active
             //Now matched with tape
             nextState = FOLLOW_TAPE;
             makeTransition = TRUE;
             ThisEvent.EventType = ES_NO_EVENT;
-            //printf("Right Tape Sensor\r\n");
         }
         
         // At a corner
-        else if (ThisEvent.EventParam == RightTape && (ThisEvent.EventParam == TopRightTape || ThisEvent.EventParam == TopLeftTape)){
-                    //Now matched with tape
-                    nextState = CORNER_TURN;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                    //printf("Top Right Tape Sensor\r\n");
-                }
+        else if ((ThisEvent.EventParam & AllRight) | (ThisEvent.EventParam & TR_R_Tape)){
+            //Now matched with tape
+            nextState = CORNER_TURN;
+            makeTransition = TRUE;
+            ThisEvent.EventType = ES_NO_EVENT;
+        }
                 
         switch (ThisEvent.EventType) {
             case ES_ENTRY:
-                ES_Timer_InitTimer(ADJUST_TIMER, HALF_SECOND);
+                ES_Timer_InitTimer(ADJUST_TIMER, ONE_SECOND);
                 break;
                 
             case ES_EXIT:
-                ES_Timer_SetTimer(ADJUST_TIMER, HALF_SECOND);
+                ES_Timer_SetTimer(ADJUST_TIMER, ONE_SECOND);
                 break;
                 
             case ES_TIMEOUT:
@@ -251,27 +260,25 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent)
         break;
         
     case FOLLOW_TAPE:
-        slightRightDrive();
+        run();
         switch (ThisEvent.EventType) {
             case TAPE_STATUS_CHANGE:
                 nextState = ALINE;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
-                break;
-            
+                break;         
         }
-        
         break;
     
     case CORNER_TURN:
         tankTurnRight();
         switch (ThisEvent.EventType) {
             case ES_ENTRY:
-                ES_Timer_InitTimer(TURN_TIMER, HALF_SECOND);
+                ES_Timer_InitTimer(TURN_TIMER, 750);
                 break;
                 
             case ES_EXIT:
-                ES_Timer_SetTimer(TURN_TIMER, HALF_SECOND);
+                ES_Timer_SetTimer(TURN_TIMER, 750);
                 break;
                 
             case ES_TIMEOUT:
