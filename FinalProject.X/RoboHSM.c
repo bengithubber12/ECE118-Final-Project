@@ -36,6 +36,7 @@
 #include "RoboHSM.h"
 #include "RoamSubHSM.h"
 #include "DepositSubHSM.h"
+//#include "MowerSubHSM.h"
 //#include all sub state machines called
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
@@ -49,6 +50,7 @@ typedef enum {
     ROAMING,
     DISCOVERING,
     DEPOSITING,
+    MOWING,
 } RoboTopHSMState_t;
 
 static const char *StateNames[] = {
@@ -56,6 +58,7 @@ static const char *StateNames[] = {
 	"ROAMING",
 	"DISCOVERING",
 	"DEPOSITING",
+	"MOWING",
 };
 
 
@@ -162,8 +165,22 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                     break;
             }
             break;
+//         case MOWING:
+//            ThisEvent = RunMowerSubHSM(ThisEvent);
+//            switch (ThisEvent.EventType) {
+//                case ES_ENTRY:
+//                    InitMowerSubHSM();
+//                    break;
+//                case ES_NO_EVENT:
+//                    break;
+//                default:
+//                    break;
+            //}
         default: // all unhandled states fall into here
             break;
+            
+       
+           
     } // end switch on Current State
 
     if (makeTransition == TRUE) { // making a state transition, send EXIT and ENTRY

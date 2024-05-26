@@ -45,6 +45,7 @@ typedef enum {
     ES_TIMERSTOPPED, /* signals that a timer has stopped*/
     /* User-defined events start here */
     TAPE_STATUS_CHANGE,
+    TRACK_WIRE_STATUS_CHANGE,
     BIAS_CHANGE,
     BUMPER_STATUS_CHANGE,
     BATTERY_CONNECTED,
@@ -64,6 +65,7 @@ static const char *EventNames[] = {
 	"ES_TIMERACTIVE",
 	"ES_TIMERSTOPPED",
 	"TAPE_STATUS_CHANGE",
+	"TRACK_WIRE_STATUS_CHANGE",
 	"BIAS_CHANGE",
 	"BUMPER_STATUS_CHANGE",
 	"BATTERY_CONNECTED",
@@ -87,12 +89,12 @@ static const char *EventNames[] = {
 // corresponding timer expires. All 16 must be defined. If you are not using
 // a timers, then you can use TIMER_UNUSED
 #define TIMER_UNUSED ((pPostFunc)0)
-#define TIMER0_RESP_FUNC TIMER_UNUSED
+#define TIMER0_RESP_FUNC PostRoboTopHSM
 #define TIMER1_RESP_FUNC PostTapeService
 #define TIMER2_RESP_FUNC PostRoboTopHSM
 #define TIMER3_RESP_FUNC PostBumperService
 #define TIMER4_RESP_FUNC PostRoboTopHSM
-#define TIMER5_RESP_FUNC TIMER_UNUSED
+#define TIMER5_RESP_FUNC PostTWService
 #define TIMER6_RESP_FUNC TIMER_UNUSED
 #define TIMER7_RESP_FUNC TIMER_UNUSED
 #define TIMER8_RESP_FUNC TIMER_UNUSED
@@ -102,7 +104,7 @@ static const char *EventNames[] = {
 #define TIMER12_RESP_FUNC TIMER_UNUSED
 #define TIMER13_RESP_FUNC TIMER_UNUSED
 #define TIMER14_RESP_FUNC TIMER_UNUSED
-#define TIMER15_RESP_FUNC TIMER_UNUSED
+#define TIMER15_RESP_FUNC PostRoboTopHSM
 
 
 /****************************************************************************/
@@ -111,11 +113,13 @@ static const char *EventNames[] = {
 // definitions for the response functions to make it easire to check that
 // the timer number matches where the timer event will be routed
 
-#define GENERIC_NAMED_TIMER 0 /*make sure this is enabled above and posting to the correct state machine*/
+#define MOWER_TIMER 0
 #define TAPE_SERVICE_TIMER 1
 #define BUMPER_SERVICE_TIMER 3
 #define ROAM_TIMER 4
+#define TRACK_WIRE_SERVICE_TIMER 5
 
+#define GenericTimer 15
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of 
 // services that the framework will handle. Reasonable values are 8 and 16
@@ -125,7 +129,7 @@ static const char *EventNames[] = {
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 4
+#define NUM_SERVICES 5
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service
@@ -185,11 +189,11 @@ static const char *EventNames[] = {
 // These are the definitions for Service 4
 #if NUM_SERVICES > 4
 // the header file with the public fuction prototypes
-#define SERV_4_HEADER "TestService.h"
+#define SERV_4_HEADER "TrackWireService.h"
 // the name of the Init function
-#define SERV_4_INIT TestServiceInit
+#define SERV_4_INIT InitTWService
 // the name of the run function
-#define SERV_4_RUN TestServiceRun
+#define SERV_4_RUN RunTWService
 // How big should this services Queue be?
 #define SERV_4_QUEUE_SIZE 3
 #endif
