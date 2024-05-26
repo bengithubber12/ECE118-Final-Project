@@ -23,6 +23,8 @@ void run(void);
 void goBackward(void);
 void pivotBackLeft(void);
 void pivotBackRight(void);
+void pivotForwardLeft(void);
+void pivotForwardRight(void);
 void tankTurnLeft(void);
 void tankTurnRight(void);
 void hardTurnLeft(void);

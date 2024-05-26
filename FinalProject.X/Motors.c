@@ -13,8 +13,8 @@
 #include "serial.h" 
 
 /////* PRIVATE DEFINITIONS */////
-#define SPEEDRIGHT 90
-#define SPEEDLEFT 85
+#define SPEEDRIGHT 100
+#define SPEEDLEFT 95
 #define FORWARD 1
 #define BACKWARD -1
 #define ROBOT_MAXSPEED 100
@@ -158,6 +158,16 @@ void pivotBackRight(void) {
 void pivotBackLeft(void) {
     RoboLeftMtrSpeed(0);
     RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
+}
+
+void pivotForwardRight(void) {
+    RoboLeftMtrSpeed(FORWARD * SPEEDLEFT);
+    RoboRightMtrSpeed(0);
+}
+
+void pivotForwardLeft(void) {
+    RoboLeftMtrSpeed(0);
+    RoboRightMtrSpeed(FORWARD * SPEEDRIGHT);
 }
 
 void stop(void) {
