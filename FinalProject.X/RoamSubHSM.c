@@ -88,6 +88,10 @@ static const char *StateNames[] = {
 #define RightTape 8
 #define BothRightTape 12
 #define AllFrontTape 15
+#define BackRightTape 16
+#define BothRightTape 24
+#define BackLeftTape 32
+#define BothLeftTape 33
 
 //Bumper Definitions
 #define FLB 1
