@@ -14,7 +14,8 @@ build/default/production/_ext/425729343/RoboHSM.o: \
  C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/Motors.h \
  C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/RoboHSM.h \
  C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/RoamSubHSM.h \
- C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/DepositSubHSM.h
+ C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/MowerSubHSM.h \
+ C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/FindDoorSubHSM.h
 
 C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/ES_Configure.h:
 
@@ -66,4 +67,6 @@ C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/RoboHSM.h:
 
 C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/RoamSubHSM.h:
 
-C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/DepositSubHSM.h:
+C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/MowerSubHSM.h:
+
+C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/FindDoorSubHSM.h:

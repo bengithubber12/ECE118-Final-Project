@@ -127,9 +127,9 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
             break;
 
         default:
-             printf("\r\nEvent: %s\tParam: 0x%X",
-                EventNames[ThisEvent.EventType], ThisEvent.EventParam);
-             break;
+            printf("\r\nEvent: %s\tParam: 0x%X",
+            EventNames[ThisEvent.EventType], ThisEvent.EventParam);
+            break;
     }
     return ReturnEvent;
 }

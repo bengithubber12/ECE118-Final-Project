@@ -42,46 +42,24 @@
  ******************************************************************************/
 typedef enum {
     InitPSubState,
-    FIND_TAPE,
-    ALINE,
-    FOLLOW_TAPE,
-    CORNER_TURN,
-    BUMPER_HANDLER,          
+    BACKUP,
+    TURN_TO_WALL,
+    BACK_TO_WALL,
 } DepositSubHSMState_t;
 
 static const char *StateNames[] = {
 	"InitPSubState",
-	"FIND_TAPE",
-	"ALINE",
-	"FOLLOW_TAPE",
-	"CORNER_TURN",
-	"BUMPER_HANDLER",
+	"BACKUP",
+	"TURN_TO_WALL",
+	"BACK_TO_WALL",
 };
 
 //Timer Definitions
 #define QUARTER_SECOND 250
 #define HALF_SECOND 500
 #define ONE_SECOND 1000
-#define ADJUST_TIMER 4
-#define BUMPER_TIMER 4
-#define TURN_TIMER 4
-
-//Tape Definitions
-#define LeftTape 0x01
-#define TopLeftTape 0x02
-#define L_TL_Tape 0x03
-#define TopRightTape 0x04
-#define BothTopTape 0x06 
-#define RightTape 0x08
-#define TR_R_Tape 0x0C 
-#define AllTopSensors 0x0F
-#define BackRightTape 0x10
-#define BothRightTape 0x18
-#define AllRight 0x1C
-#define BackLeftTape 0x20
-#define BothLeftTape 0x21
-#define AllLeft 0x23
-#define BothBackTape 0x30
+#define TURN_TIMER 6
+#define BACK_UP_TIMER 6
 
 //Bumper Definitions
 #define FLB 1
@@ -121,8 +99,7 @@ static uint8_t MyPriority;
  *        to rename this to something appropriate.
  *        Returns TRUE if successful, FALSE otherwise
  * @author J. Edward Carryer, 2011.10.23 19:25 */
-uint8_t InitDepositSubHSM(void)
-{
+uint8_t InitDepositSubHSM(void) {
     ES_Event returnEvent;
 
     CurrentState = InitPSubState;
@@ -134,7 +111,7 @@ uint8_t InitDepositSubHSM(void)
 }
 
 /**
- * @Function RunTemplateSubHSM(ES_Event ThisEvent)
+ * @Function RunDepositSubHSM(ES_Event ThisEvent)
  * @param ThisEvent - the event (type and param) to be responded.
  * @return Event - return event (type and param), in general should be ES_NO_EVENT
  * @brief This function is where you implement the whole of the heirarchical state
@@ -148,207 +125,124 @@ uint8_t InitDepositSubHSM(void)
  *       not consumed as these need to pass pack to the higher level state machine.
  * @author J. Edward Carryer, 2011.10.23 19:25
  * @author Gabriel H Elkaim, 2011.10.23 19:25 */
-ES_Event RunDepositSubHSM(ES_Event ThisEvent)
-{
+ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
     uint8_t makeTransition = FALSE; // use to flag transition
     DepositSubHSMState_t nextState; // <- change type to correct enum
 
     ES_Tattle(); // trace call stack
 
     switch (CurrentState) {
-    case InitPSubState: // If current state is initial Psedudo State
-        if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
-        {
-            // this is where you would put any actions associated with the
-            // transition from the initial pseudo-state into the actual
-            // initial state
+        case InitPSubState: // If current state is initial Psedudo State
+            if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
+            {
+                // this is where you would put any actions associated with the
+                // transition from the initial pseudo-state into the actual
+                // initial state
 
-            // now put the machine into the actual initial state
-            nextState = FIND_TAPE;
-            makeTransition = TRUE;
-            ThisEvent.EventType = ES_NO_EVENT;
-        }
-        break;
-
-    case FIND_TAPE: // in the first state, replace this with correct names
-        
-        run();
-        switch (ThisEvent.EventType) {
-            case ES_ENTRY:
-                break;
-
-            case TAPE_STATUS_CHANGE:
-                nextState = ALINE;
+                // now put the machine into the actual initial state
+                nextState = BACKUP;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
-                break;
-                
-            case BUMPER_STATUS_CHANGE:
-                nextState = BUMPER_HANDLER;
-                makeTransition = TRUE;
-                ThisEvent.EventType = ES_NO_EVENT;
-                break;
-            default: // all unhandled events pass the event back up to the next level
-                break;
-        }
-        break;
-        
-    case ALINE: //State used to aline robot so it follows the tape going left
-            
-        //Determine which tape sensor is triggered
-        if (ThisEvent.EventParam & LeftTape){// ONLY Left Tape Sensor Triggered
-            pivotBackRight();
-            //printf("Left Tape Sensor\r\n");
-        }
-        else if (ThisEvent.EventParam & TopLeftTape){// ONLY Top Left Triggered
-            pivotBackRight();
-            //printf("Top Left Tape Sensor\r\n");
-        }
-        else if ((ThisEvent.EventParam & TopRightTape)){ //ONLY Top Right Triggered
-            pivotForwardLeft();
-            //printf("Top Right Tape Sensor\r\n");
-        }
-        else if ((ThisEvent.EventParam & BackLeftTape)){ //ONLY Back Left Triggered
-            pivotForwardRight();
-            //printf("Back Left Tape Sensor\r\n");
-        }
-        else if ((ThisEvent.EventParam & TopRightTape) && (ThisEvent.EventParam & RightTape)){// Both Right Tape Triggered
-            pivotBackRight();
-            //printf("Both Right Tape Sensors\r\n");
-        }
-        else if (ThisEvent.EventParam & BothRightTape){// Right and BackRight tape active
-            //Now matched with tape
-            nextState = FOLLOW_TAPE;
-            makeTransition = TRUE;
-            ThisEvent.EventType = ES_NO_EVENT;
-        }
-        
-        // At a corner
-        else if ((ThisEvent.EventParam & AllRight) | (ThisEvent.EventParam & TR_R_Tape)){
-            //Now matched with tape
-            nextState = CORNER_TURN;
-            makeTransition = TRUE;
-            ThisEvent.EventType = ES_NO_EVENT;
-        }
-                
-        switch (ThisEvent.EventType) {
-            case ES_ENTRY:
-                ES_Timer_InitTimer(ADJUST_TIMER, ONE_SECOND);
-                break;
-                
-            case ES_EXIT:
-                ES_Timer_SetTimer(ADJUST_TIMER, ONE_SECOND);
-                break;
-                
-            case ES_TIMEOUT:
-                if (ThisEvent.EventParam == ADJUST_TIMER){
-                    nextState = FIND_TAPE;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                }
-                break;
-            
-            case BUMPER_STATUS_CHANGE:
-                nextState = BUMPER_HANDLER;
-                makeTransition = TRUE;
-                ThisEvent.EventType = ES_NO_EVENT;
-                break;
+            }
+            break;
 
-            default: // all unhandled events pass the event back up to the next level
-                break;
-        }
-        break;
-        
-    case FOLLOW_TAPE:
-        run();
-        switch (ThisEvent.EventType) {
-            case TAPE_STATUS_CHANGE:
-                nextState = ALINE;
-                makeTransition = TRUE;
-                ThisEvent.EventType = ES_NO_EVENT;
-                break;         
-        }
-        break;
-    
-    case CORNER_TURN:
-        tankTurnRight();
-        switch (ThisEvent.EventType) {
-            case ES_ENTRY:
-                ES_Timer_InitTimer(TURN_TIMER, 750);
-                break;
-                
-            case ES_EXIT:
-                ES_Timer_SetTimer(TURN_TIMER, 750);
-                break;
-                
-            case ES_TIMEOUT:
-                if (ThisEvent.EventParam == TURN_TIMER){
-                    nextState = FIND_TAPE;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                }
-                break;
-        }
-        
-                
-    case BUMPER_HANDLER:
-        
-        //Determine which bumper is triggered
-        if (ThisEvent.EventParam == FLB){// Front Left Bumper
-            pivotBackRight();
-            //printf("Front Left Bumper\r\n");
-        }
-        else if (ThisEvent.EventParam == FRB){// Front Right Bumper
-            pivotBackLeft();
-            //printf("Front Right Bumper\r\n");
-        }
-        else if ((ThisEvent.EventParam == FrontBumpers)){//Both Front Bumpers
+        case BACKUP:
             goBackward();
-            //printf("Both Front Bumpers\r\n");
-        }
-        else if (ThisEvent.EventParam == BRB){// Back Right Bumper
-            run();
-            //printf("Back Right Bumper\r\n");
-        }
-        else if (ThisEvent.EventParam == BLB){// Back Left Bumper
-            run();
-            //printf("Back Left Bumper\r\n");
-        }
-        else if (ThisEvent.EventParam == BackBumpers){// Both Back Bumpers
-            run();
-            //printf("Both Back Bumpers\r\n");
-        }
-
-        switch (ThisEvent.EventType) {
-            case ES_ENTRY:
-                ES_Timer_InitTimer(BUMPER_TIMER, QUARTER_SECOND);
-                break;
-
-            case ES_EXIT:
-                ES_Timer_SetTimer(BUMPER_TIMER, QUARTER_SECOND);
-                break;
-
-            case ES_TIMEOUT: 
-                if (ThisEvent.EventParam == BUMPER_TIMER) {
-                    //printf("Bumper timer done\r\n");
-                    nextState = FIND_TAPE;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                }
-                break;
-                
-            default: // all unhandled events pass the event back up to the next level
+            switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    ES_Timer_InitTimer(BACK_UP_TIMER, 750);
                     break;
-        }
-        break;
-           
-    default: // all unhandled states fall into here
-        break;
+
+                case ES_EXIT:
+                    ES_Timer_SetTimer(BACK_UP_TIMER, 750);
+                    break;
+
+                case ES_TIMEOUT:
+                    if (ThisEvent.EventParam == BACK_UP_TIMER) {
+                        nextState = TURN_TO_WALL;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+                    
+                default: // all unhandled events pass the event back up to the next level
+                    break;
+            }
+            break;
+            
+        case TURN_TO_WALL:
+            tankTurnLeft();
+            switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    ES_Timer_InitTimer(TURN_TIMER, ONE_SECOND);
+                    break;
+
+                case ES_EXIT:
+                    ES_Timer_SetTimer(TURN_TIMER, ONE_SECOND);
+                    break;
+
+                case ES_TIMEOUT:
+                    if (ThisEvent.EventParam == TURN_TIMER) {
+                        nextState = BACK_TO_WALL;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+                    
+                default: // all unhandled events pass the event back up to the next level
+                    break;
+            }
+            break;
+            
+        case BACK_TO_WALL:
+            goBackward();
+            switch (ThisEvent.EventType) {
+                
+                case BUMPER_STATUS_CHANGE: //if back bumpers hit
+                    switch (ThisEvent.EventParam) {
+                        case BRB:
+                            //servo stuff
+                            stop();
+                            break;
+                        case BLB:
+                            //servo stuff
+                            stop();
+                            break;
+                        case BackBumpers: 
+                            //servo stuff
+                            stop();
+                            break;
+                    }
+                    break;
+                    
+                case ES_ENTRY:
+                    //ES_Timer_InitTimer(TURN_TIMER, ONE_SECOND);
+                    break;
+
+                case ES_EXIT:
+                    //ES_Timer_SetTimer(TURN_TIMER, ONE_SECOND);
+                    break;
+
+                case ES_TIMEOUT:
+                    //if (ThisEvent.EventParam == TURN_TIMER) {
+                    //    nextState = BACK_TO_WALL;
+                    //    makeTransition = TRUE;
+                    //    ThisEvent.EventType = ES_NO_EVENT;
+                    //}
+                    break;
+                    
+                default: // all unhandled events pass the event back up to the next level
+                    break;
+            }
+            break;
+
+        default: // all unhandled states fall into here
+            break;
     } // end switch on Current State
 
     if (makeTransition == TRUE) { // making a state transition, send EXIT and ENTRY
         // recursively call the current state with an exit event
-        RunDepositSubHSM(EXIT_EVENT); 
+        RunDepositSubHSM(EXIT_EVENT);
         CurrentState = nextState;
         RunDepositSubHSM(ENTRY_EVENT);
     }

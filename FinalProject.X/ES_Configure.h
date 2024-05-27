@@ -45,7 +45,8 @@ typedef enum {
     ES_TIMERSTOPPED, /* signals that a timer has stopped*/
     /* User-defined events start here */
     TAPE_STATUS_CHANGE,
-    TRACK_WIRE_STATUS_CHANGE,
+    TRACK_WIRE_FOUND,
+    TRACK_WIRE_NOT_DETECTED,
     BIAS_CHANGE,
     BUMPER_STATUS_CHANGE,
     BATTERY_CONNECTED,
@@ -65,7 +66,8 @@ static const char *EventNames[] = {
 	"ES_TIMERACTIVE",
 	"ES_TIMERSTOPPED",
 	"TAPE_STATUS_CHANGE",
-	"TRACK_WIRE_STATUS_CHANGE",
+	"TRACK_WIRE_FOUND",
+	"TRACK_WIRE_NOT_DETECTED",
 	"BIAS_CHANGE",
 	"BUMPER_STATUS_CHANGE",
 	"BATTERY_CONNECTED",
@@ -95,7 +97,7 @@ static const char *EventNames[] = {
 #define TIMER3_RESP_FUNC PostBumperService
 #define TIMER4_RESP_FUNC PostRoboTopHSM
 #define TIMER5_RESP_FUNC PostTWService
-#define TIMER6_RESP_FUNC TIMER_UNUSED
+#define TIMER6_RESP_FUNC PostRoboTopHSM
 #define TIMER7_RESP_FUNC TIMER_UNUSED
 #define TIMER8_RESP_FUNC TIMER_UNUSED
 #define TIMER9_RESP_FUNC TIMER_UNUSED
@@ -118,6 +120,7 @@ static const char *EventNames[] = {
 #define BUMPER_SERVICE_TIMER 3
 #define ROAM_TIMER 4
 #define TRACK_WIRE_SERVICE_TIMER 5
+#define DEPOSIT_TIMER 6
 
 #define GenericTimer 15
 /****************************************************************************/

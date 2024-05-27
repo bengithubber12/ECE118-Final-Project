@@ -10,23 +10,28 @@
 #include "ES_Framework.h"
 #include "TrackWireService.h"
 #include <stdio.h>
-#include "Motors.h"
-#define TIMER_7_TICKS 5
-#define TW_TRIGGER_HIGH 0000
-#define TW_TRIGGER_LOW  0000
+
+//THRESHOLDS
+#define TW_TICKS 5
+#define TW_TRIGGER_HIGH 270
+#define TW_TRIGGER_LOW  250
+
+
 static uint8_t lastEvent  = 0;
 static uint8_t MyPriority;
 
 uint8_t InitTWService(uint8_t Priority)
 {
-    ES_Timer_InitTimer(TRACK_WIRE_SERVICE_TIMER, TIMER_7_TICKS);
     
     ES_Event ThisEvent;
 
     MyPriority = Priority;
-    //Setup Beacon Detector Pin (PORT V7)
+    //Setup Beacon Detector Pin (PORT W8)
     AD_Init();
     AD_AddPins(AD_PORTW8);
+    
+    //Init timer
+    ES_Timer_InitTimer(TRACK_WIRE_SERVICE_TIMER, TW_TICKS);
     
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -42,36 +47,43 @@ uint8_t PostTWService(ES_Event ThisEvent)
 }
 
 
-
 ES_Event RunTWService(ES_Event ThisEvent) {
     ES_Event ReturnEvent;
     ReturnEvent.EventType = ES_NO_EVENT;
-    //uint8_t curEvent;
+    uint8_t curEvent;
     static uint8_t lastEvent  = 0;
-    uint16_t curTWRead;
+    
+    uint16_t TWRead = AD_ReadADPin(AD_PORTW8); //read trackwire from port
+    //printf("TWRead = %d\r\n", TWRead);
     switch(ThisEvent.EventType){
         case ES_INIT:
             break;
-        case ES_TIMERACTIVE:
-            break;
-        case ES_TIMERSTOPPED:
-            break;
+
         case ES_TIMEOUT:
-            curTWRead = AD_ReadADPin(AD_PORTW8);
-            //Return change event if current read goes above threshold or vice versa!
-            if (curTWRead > TW_TRIGGER_HIGH && lastEvent < TW_TRIGGER_LOW){
-                ReturnEvent.EventType = TRACK_WIRE_STATUS_CHANGE;
-                lastEvent = curTWRead;
+            //Reset timer
+            ES_Timer_InitTimer(TRACK_WIRE_SERVICE_TIMER, TW_TICKS);
+            
+            //Track wire is detected if within certain bounds
+            if (TWRead < TW_TRIGGER_HIGH && TWRead > TW_TRIGGER_LOW){
+                curEvent = TRACK_WIRE_FOUND;
             }
-            else if (curTWRead > TW_TRIGGER_LOW && lastEvent > TW_TRIGGER_HIGH){
-                ReturnEvent.EventType = TRACK_WIRE_STATUS_CHANGE;
-                lastEvent = curTWRead;
+            else {
+                curEvent = TRACK_WIRE_NOT_DETECTED;
             }
-            ES_Timer_InitTimer(TRACK_WIRE_SERVICE_TIMER, TIMER_7_TICKS);
+            
+             // compare previous and current values
+            if (lastEvent != curEvent) {
+                ReturnEvent.EventType = curEvent;
+                ReturnEvent.EventParam = TWRead;
+                lastEvent = curEvent;
+                PostRoboTopHSM(ReturnEvent);
+                //PostTapeService(ReturnEvent);
+            }
             break;
+            
         default:
-            printf("\r\nEvent: %s\tParam: 0x%X",
-            EventNames[ThisEvent.EventType], ThisEvent.EventParam);
+            //printf("\r\nEvent: %s\tParam: 0x%X",
+            //EventNames[ThisEvent.EventType], ThisEvent.EventParam);
             break;
     }
     return ReturnEvent;

@@ -126,8 +126,8 @@ void run(void) {
 }
 
 void goBackward(void) {
-    RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
-    RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
+    RoboLeftMtrSpeed(BACKWARD * 90);
+    RoboRightMtrSpeed(BACKWARD * 85);
 }
 
 void tankTurnRight(void) {

@@ -1,5 +1,5 @@
 /*
- * File: TemplateSubHSM.c
+ * File: RoboSubHSM.c
  * Author: J. Edward Carryer
  * Modified: Gabriel Elkaim and Soja-Marie Morgens
  *
@@ -35,8 +35,9 @@
 #include "Motors.h"
 #include "RoboHSM.h"
 #include "RoamSubHSM.h"
-#include "DepositSubHSM.h"
-//#include "MowerSubHSM.h"
+//#include "DepositSubHSM.h"
+#include "MowerSubHSM.h"
+#include "FindDoorSubHSM.h"
 //#include all sub state machines called
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
@@ -48,16 +49,14 @@
 typedef enum {
     InitPState,
     ROAMING,
-    DISCOVERING,
-    DEPOSITING,
+    FIND_DOOR,
     MOWING,
 } RoboTopHSMState_t;
 
 static const char *StateNames[] = {
 	"InitPState",
 	"ROAMING",
-	"DISCOVERING",
-	"DEPOSITING",
+	"FIND_DOOR",
 	"MOWING",
 };
 
@@ -109,13 +108,14 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
         case InitPState: // If current state is initial Pseudo State
             if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
             {
-                // Initialize all sub-state machines (NEED TO CREATE  SUB-STATE MACHINES)
+                // Initialize all sub-state machines
                 InitRoamSubHSM();
-                InitDepositSubHSM();
+                //InitDepositSubHSM();
+                InitFindDoorSubHSM();
                 //InitBeaconSubHSM();
                 
                 // now put the machine into the actual initial state
-                nextState = DEPOSITING;
+                nextState = FIND_DOOR;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
             }
@@ -133,7 +133,7 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                         //curMotorBias ^= 1;
                         //roboSway(curMotorBias); 
                         //printf("Tape timer done\r\n");
-                        nextState = ROAMING;
+                        nextState = FIND_DOOR;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
@@ -145,19 +145,12 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
             }
             
             break;
-        case DISCOVERING:
-            switch (ThisEvent.EventType) {
-                case ES_NO_EVENT:
-                    break;
-                default:
-                    break;
-            }
-            break;
-        case DEPOSITING:
-            ThisEvent = RunDepositSubHSM(ThisEvent);
+
+        case FIND_DOOR:
+            ThisEvent = RunFindDoorSubHSM(ThisEvent);
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    InitDepositSubHSM();
+                    InitFindDoorSubHSM();
                     break;
                 case ES_NO_EVENT:
                     break;

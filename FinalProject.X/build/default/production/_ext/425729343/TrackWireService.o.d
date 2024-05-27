@@ -10,8 +10,7 @@ build/default/production/_ext/425729343/TrackWireService.o: \
  ../ECE118/include/ES_Queue.h ../ECE118/include/ES_ServiceHeaders.h \
  ES_Configure.h TapeService.h ES_Configure.h ../ECE118/include/RoboHSM.h \
  BumperService.h TrackWireService.h ../ECE118/include/ES_TattleTale.h \
- C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/TrackWireService.h \
- C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/Motors.h
+ C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/TrackWireService.h
 
 ../ECE118/include/BOARD.h:
 
@@ -58,5 +57,3 @@ TrackWireService.h:
 ../ECE118/include/ES_TattleTale.h:
 
 C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/TrackWireService.h:
-
-C:/Users/jeemcast/OneDrive\ -\ ucsc.edu/FinalProject.X/Motors.h:

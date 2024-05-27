@@ -153,23 +153,13 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                 ES_Timer_InitTimer(ROAM_TIMER, ROAM_TIME);
                 //roboSway(curMotorBias);
                 //run();
-#ifdef TRACK_WIRE
-                nextState = TEST_TW;
-#endif
-#ifndef TRACK_WIRE
                 nextState = FREE_ROAM;
-#endif
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
 
             }
             break;
-#ifdef TRACK_WIRE
-        case TEST_TW:
-            beltDriveMax();
-            break;
-#endif
-#ifndef TRACK_WIRE
+
         case FREE_ROAM: // in the first state, replace this with correct names
             roboSway(curMotorBias); // right 
             switch (ThisEvent.EventType) {
@@ -304,7 +294,7 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                     break;
             }
             break;
-#endif
+            
         default: // all unhandled states fall into here
             break;
     } // end switch on Current State
