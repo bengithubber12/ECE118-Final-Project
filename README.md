@@ -15,12 +15,12 @@ PORT V05<-->Robot Belt Drive <br />
 PORT V06<-->Robot Belt Drive Inv <br />
 
 //Tape Sensors <br />
-PORT Z3<-->Left Sensor <br />
-PORT W4<-->Top Left Sensor <br />
-PORT W3<-->Top Right Sensor <br />
-PORT Z10<-->Right Sensor <br />
-PORT Z4 <--> Back Right Sensor <br />
-PORT Z9 <--> Back Left Sensor <br />
+PORT Z6 <-->Left Sensor <br />
+PORT Z8 <-->Top Left Sensor <br />
+PORT Z5 <-->Top Right Sensor <br />
+PORT Z7 <-->Right Sensor <br />
+PORT Z9 <--> Back Right Sensor <br />
+PORT Z11 <--> Back Left Sensor <br />
 
 //Bumpers <br />
 PORT X10<-->Front Left <br />
