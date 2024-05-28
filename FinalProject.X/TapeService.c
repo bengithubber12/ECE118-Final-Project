@@ -40,13 +40,14 @@ uint8_t InitTapeService(uint8_t Priority) {
     ES_Event ThisEvent;
 
     MyPriority = Priority;
+    
     //Setup tape sensors pins
-    AD_Init();
-    AD_AddPins(AD_PORTW4 | AD_PORTW3);
-    PORTZ04_TRIS = 1;  //TapeBackRight
-    PORTZ10_TRIS = 1;  //TapeRight
-    PORTZ03_TRIS = 1;  //TapeLeft
-    PORTZ09_TRIS = 1;  //TapeBackLeft
+    PORTZ06_TRIS = 1;  //TapeLeft
+    PORTZ08_TRIS = 1;  //TapeTopLeft
+    PORTZ05_TRIS = 1;  //TapeTopRight 
+    PORTZ07_TRIS = 1;  //TapeRight
+    //PORTZ09_TRIS = 1;  //TapeBackRight
+    //PORTZ11_TRIS = 1;  //TapeBackLeft
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -65,17 +66,18 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
     ReturnEvent.EventType = ES_NO_EVENT;
     static uint8_t lastEvent = 0x00;
     uint8_t curEvent;
-    int TapeRight = PORTZ10_BIT;
-    //printf("TapeRight: %d\r\n", TapeRight);
-    uint16_t TapeTopRight = AD_ReadADPin(AD_PORTW3);
-    //printf("TapeTopRight: %d\r\n", TapeTopRight);
-    int TapeLeft = PORTZ03_BIT;
+
+    int TapeLeft = PORTZ06_BIT;
     //printf("TapeLeft: %d\r\n", TapeLeft);
-    uint16_t TapeTopLeft = AD_ReadADPin(AD_PORTW4);
+    int TapeTopLeft = PORTZ08_BIT;
     //printf("TapeTopLeft: %d\r\n", TapeTopLeft);
-    int TapeBackRight = PORTZ04_BIT;
+    int TapeTopRight = PORTZ05_BIT;
+    //printf("TapeTopRight: %d\r\n", TapeTopRight);
+    int TapeRight = PORTZ07_BIT;
+    //printf("TapeRight: %d\r\n", TapeRight);
+    int TapeBackRight = PORTZ09_BIT;
     //printf("TapeBackRight: %d\r\n", TapeBackRight);
-    int TapeBackLeft = PORTZ09_BIT;
+    int TapeBackLeft = PORTZ11_BIT;  
     //printf("TapeBackLeft: %d\r\n", TapeBackLeft);
 
 

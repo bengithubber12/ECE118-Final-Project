@@ -109,13 +109,13 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
             if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
             {
                 // Initialize all sub-state machines
-                InitRoamSubHSM();
+                //InitRoamSubHSM();
                 //InitDepositSubHSM();
-                InitFindDoorSubHSM();
+                //InitFindDoorSubHSM();
                 //InitBeaconSubHSM();
                 
                 // now put the machine into the actual initial state
-                nextState = FIND_DOOR;
+                nextState = ROAMING;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
             }
@@ -152,8 +152,9 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                 case ES_ENTRY:
                     InitFindDoorSubHSM();
                     break;
+                    /*
                 case ES_NO_EVENT:
-                    break;
+                    break;*/
                 default:
                     break;
             }

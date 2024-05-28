@@ -14,7 +14,7 @@
 
 /////* PRIVATE DEFINITIONS */////
 #define SPEEDRIGHT 100
-#define SPEEDLEFT 95
+#define SPEEDLEFT 100
 #define FORWARD 1
 #define BACKWARD -1
 #define ROBOT_MAXSPEED 100

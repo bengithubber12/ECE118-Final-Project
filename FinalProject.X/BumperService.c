@@ -40,6 +40,11 @@ uint8_t InitBumperService(uint8_t Priority)
     PORTX09_TRIS = 1;  //back left
     PORTX06_TRIS = 1;  //front right
     PORTX05_TRIS = 1;  //back right
+    
+    //PORTX10_LAT = 0;  //front left
+    //PORTX09_LAT = 0;  //back left
+    //PORTX06_LAT = 0;  //front right
+    //PORTX05_LAT = 0;  //back right
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -60,9 +65,9 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
     ReturnEvent.EventType = ES_NO_EVENT;
     static uint8_t lastEvent  = 0x00;
     uint8_t curEvent;
-    
+    unsigned char bumperRead = 0x00;
     //array of all readings 
-    unsigned char bumperRead = ((PORTX09_BIT << 3) | ((PORTX05_BIT << 2) | ((PORTX06_BIT << 1) | PORTX10_BIT)));
+    bumperRead = ((PORTX09_BIT << 3) | ((PORTX05_BIT << 2) | ((PORTX06_BIT << 1) | PORTX10_BIT)));
     
     switch(ThisEvent.EventType){
         case ES_INIT:
@@ -74,7 +79,7 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
         case ES_TIMEOUT:
             ES_Timer_InitTimer(BUMPER_SERVICE_TIMER, BUMPER_TIMER_TICKS); // runs every 5ms
             curEvent = 0x00;
-            
+            //printf("BumperRead: %d\r\n", bumperRead);
             //Front Left Bumper
             if (bumperRead & FLEFT_BUMP_MASK) {
                 //printf("FLB Triggered.\r\n");
@@ -126,10 +131,10 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
             }
             break;
 
-        default:
-            printf("\r\nEvent: %s\tParam: 0x%X",
-            EventNames[ThisEvent.EventType], ThisEvent.EventParam);
-            break;
+//        default:
+//            printf("\r\nEvent: %s\tParam: 0x%X",
+//            EventNames[ThisEvent.EventType], ThisEvent.EventParam);
+//            break;
     }
     return ReturnEvent;
 }
