@@ -151,6 +151,7 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
     RoamSubHSMState_t nextState;
     ES_Tattle(); // trace call stack
     unsigned char bumperRead;
+    unsigned char tapeRead;
     switch (CurrentState) {
         case InitPSubState: // If current state is initial Psedudo State
             if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
@@ -194,21 +195,21 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             break;
 
         case TAPE_HANDLER: // Handles tape detection
-
+            tapeRead = ((PORTZ11_BIT << 5) | ((PORTZ09_BIT << 4) | (PORTZ07_BIT << 3) | (PORTZ05_BIT << 2) | (PORTZ08_BIT << 1) | (PORTZ06_BIT) ));
             //Determine which tape sensor is triggered
-            if (ThisEvent.EventParam == LeftTape) {// ONLY Left Tape Sensor Triggered
+            if ((int)tapeRead == LeftTape) {// ONLY Left Tape Sensor Triggered
                 pivotBackRight();
                 //printf("Front Left Tape Sensor\r\n");
-            } else if ((ThisEvent.EventParam == TopLeftTape || ThisEvent.EventParam == BothLeftTape)) {// Front TOP Left or (Top Left and Left) Triggered
+            } else if (((int)tapeRead == TopLeftTape || (int)tapeRead == BothLeftTape)) {// Front TOP Left or (Top Left and Left) Triggered
                 tankTurnRight();
                 //printf("Top Left Tape Sensor\r\n");
-            } else if ((ThisEvent.EventParam == TopRightTape)) {// ONLY TOP Right Tape Sensor Triggered
+            } else if (((int)tapeRead == TopRightTape)) {// ONLY TOP Right Tape Sensor Triggered
                 pivotBackLeft();
                 //printf("Front Right Tape Sensor\r\n");
-            } else if (ThisEvent.EventParam == RightTape || ThisEvent.EventParam == BothRightTape) {// Front TOP Right or (Top Right and Front Right) Triggered
+            } else if ((int)tapeRead == RightTape || (int)tapeRead == BothRightTape) {// Front TOP Right or (Top Right and Front Right) Triggered
                 tankTurnLeft();
                 //printf("Top Right Tape Sensor\r\n");
-            } else if ((ThisEvent.EventParam == BothTopTape) || ThisEvent.EventParam == AllFrontTape) { //Either All front tape sensors are triggered or just front tape sensors
+            } else if (((int)tapeRead == BothTopTape) || (int)tapeRead == AllFrontTape) { //Either All front tape sensors are triggered or just front tape sensors
                 goBackward();
             }
 

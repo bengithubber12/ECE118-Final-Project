@@ -29,8 +29,6 @@
 #include "IO_Ports.h"
 
 #define TIMER_1_TICKS 5
-#define TAPE_FR_THRESHOLD 105       //front right  
-#define TAPE_FL_THRESHOLD 105       //front left 
 
 static uint8_t MyPriority;
 
@@ -80,7 +78,7 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
     int TapeBackLeft = PORTZ11_BIT;  
     //printf("TapeBackLeft: %d\r\n", TapeBackLeft);
 
-
+    
     switch (ThisEvent.EventType) {
         case ES_INIT:
             break;
@@ -102,7 +100,7 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
             }
 
             // check for Front Left Tape
-            if (TapeTopLeft < TAPE_FL_THRESHOLD) {
+            if (TapeTopLeft) {
                 //printf("Top Left reading: %d\r\n", TapeTopLeft);
                 curEvent |= (1 << 1);
             } else {
@@ -111,7 +109,7 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
             }
 
             // check for Front Right Tape
-            if (TapeTopRight < TAPE_FR_THRESHOLD) {
+            if (TapeTopRight) {
                 //printf("Top Right reading: %d\r\n", TapeTopRight);
                 curEvent |= (1 << 2);
             } else {

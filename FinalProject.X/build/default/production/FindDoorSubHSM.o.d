@@ -9,7 +9,7 @@ build/default/production/FindDoorSubHSM.o: FindDoorSubHSM.c \
  ES_Configure.h ../ECE118/include/RoboHSM.h BumperService.h \
  TrackWireService.h ../ECE118/include/ES_TattleTale.h \
  ../ECE118/include/BOARD.h RoboHSM.h FindDoorSubHSM.h DepositSubHSM.h \
- Motors.h
+ Motors.h ../ECE118/include/IO_Ports.h
 
 ES_Configure.h:
 
@@ -60,3 +60,5 @@ FindDoorSubHSM.h:
 DepositSubHSM.h:
 
 Motors.h:
+
+../ECE118/include/IO_Ports.h:

@@ -34,7 +34,8 @@
 #include "FindDoorSubHSM.h"
 #include "DepositSubHSM.h"
 #include "Motors.h"
-
+//#include <xc.h>
+#include "IO_Ports.h"
 /*******************************************************************************
  * MODULE #DEFINES                                                             *
  ******************************************************************************/
@@ -66,7 +67,6 @@ static const char *StateNames[] = {
 #define ADJUST_TIMER 8
 #define TURN_TIMER 8
 #define BUMPER_TIMER 7
-
 
 //Tape Definitions
 #define LeftTape 0x01
@@ -154,7 +154,7 @@ uint8_t InitFindDoorSubHSM(void) {
 ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
     uint8_t makeTransition = FALSE; // use to flag transition
     FindDoorSubHSMState_t nextState; // <- change type to correct enum
-
+    unsigned char bumperRead;
     ES_Tattle(); // trace call stack
 
     switch (CurrentState) {
@@ -240,8 +240,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
             //    makeTransition = TRUE;
             //   ThisEvent.EventType = ES_NO_EVENT;
             //}
-
-
+            
             switch (ThisEvent.EventType) {
 
                 case ES_ENTRY:
@@ -325,41 +324,38 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
 
         case BUMPER_HANDLER:
             //Determine which bumper is triggered
-            if (ThisEvent.EventParam == 1) {// Front Left Bumper
+            bumperRead = ((PORTX09_BIT << 3) | ((PORTX05_BIT << 2) | ((PORTX06_BIT << 1) | PORTX10_BIT)));
+            //Determine which bumper is triggered
+            if ((int) bumperRead == FLB) {// Front Left Bumper
                 pivotBackRight();
-                printf("ONLY Front Left Bumper\r\n");
-            } else if (ThisEvent.EventParam == 2) {// Front Right Bumper
+                //printf("Front Left Bumper\r\n");
+            } else if ((int) bumperRead == FRB) {// Front Right Bumper
                 pivotBackLeft();
-                printf("ONLY Front Right Bumper\r\n");
-            } else if ((ThisEvent.EventParam == 3)) {//Both Front Bumpers
+                //printf("Front Right Bumper\r\n");
+            } else if (((int) bumperRead == FrontBumpers)) {//Both Front Bumpers
                 goBackward();
                 //printf("Both Front Bumpers\r\n");
-            }
-            else if ((ThisEvent.EventParam == 4)) { //Back Left Bumpers
-                goBackward();
-                //printf("Both Front Bumpers\r\n");
-            }
-            else if (ThisEvent.EventParam == 9) {// BL and Front Left Bumper
-                pivotBackRight();
-                printf("BL and Front Left Bumper\r\n");
-            } else if (ThisEvent.EventParam == 10) {// BL and Front Right Bumper
-                pivotBackLeft();
-                printf("BL and Front Right Bumper\r\n");
-            } else if (ThisEvent.EventParam == BacksAndFR) {// Backs and Front Right Bumper
-                pivotBackLeft();
-                printf("Both back and Front Right Bumper\r\n");
-            } else if (ThisEvent.EventParam == BacksAndFL) {// Backs and Front Left Bumper
-                pivotBackRight();
-                printf("Both back and Front Left Bumper\r\n");
-            } else if (ThisEvent.EventParam == BRB) {// Back Right Bumper
+            } else if ((int) bumperRead == BRB) {// Back Right Bumper
                 //run();
                 //printf("Back Right Bumper\r\n");
-            } else if (ThisEvent.EventParam == BLB) {// Back Left Bumper
+            } else if ((int) bumperRead == BLB) {// Back Left Bumper
                 //run();
                 //printf("Back Left Bumper\r\n");
-            } else if (ThisEvent.EventParam == BackBumpers) {// Both Back Bumpers
+            } else if ((int) bumperRead == BackBumpers) {// Both Back Bumpers
                 //run();
                 //printf("Both Back Bumpers\r\n");
+            } else if ((int) bumperRead == 9) {// BL and Front Left Bumper
+                pivotBackRight();
+                //printf("BL and Front Left Bumper\r\n");
+            } else if ((int) bumperRead == 10) {// BL and Front Right Bumper
+                pivotBackLeft();
+                //printf("BL and Front Right Bumper\r\n");
+            } else if ((int) bumperRead == BacksAndFR) {// Backs and Front Right Bumper
+                pivotBackLeft();
+                //printf("Both back and Front Right Bumper\r\n");
+            } else if ((int) bumperRead == BacksAndFL) {// Backs and Front Left Bumper
+                pivotBackRight();
+                //printf("Both back and Front Left Bumper\r\n");
             }
 
             switch (ThisEvent.EventType) {
