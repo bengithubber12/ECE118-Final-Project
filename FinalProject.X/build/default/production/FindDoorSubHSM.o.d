@@ -1,59 +1,50 @@
 build/default/production/FindDoorSubHSM.o: FindDoorSubHSM.c \
- ES_Configure.h ../ECE118/include/ES_Framework.h \
- ../ECE118/include/ES_Events.h ../ECE118/include/ES_Timers.h \
- ../ECE118/include/ES_CheckEvents.h ../ECE118/include/ES_General.h \
- ../ECE118/include/ES_KeyboardInput.h ../ECE118/include/ES_LookupTables.h \
- ../ECE118/include/ES_Port.h ../ECE118/include/ES_PostList.h \
- ../ECE118/include/ES_PriorTables.h ../ECE118/include/ES_Queue.h \
- ../ECE118/include/ES_ServiceHeaders.h ES_Configure.h TapeService.h \
- ES_Configure.h ../ECE118/include/RoboHSM.h BumperService.h \
- TrackWireService.h ../ECE118/include/ES_TattleTale.h \
- ../ECE118/include/BOARD.h RoboHSM.h FindDoorSubHSM.h DepositSubHSM.h \
- Motors.h ../ECE118/include/IO_Ports.h
+ ES_Configure.h ES_Framework.h ES_Events.h ES_Timers.h ES_CheckEvents.h \
+ ES_General.h ES_KeyboardInput.h ES_LookupTables.h ES_Port.h \
+ ES_PostList.h ES_PriorTables.h ES_Queue.h ES_ServiceHeaders.h \
+ TapeService.h RoboHSM.h BumperService.h TrackWireService.h \
+ ES_TattleTale.h ES_Configure.h BOARD.h FindDoorSubHSM.h DepositSubHSM.h \
+ Motors.h IO_Ports.h BOARD.h
 
 ES_Configure.h:
 
-../ECE118/include/ES_Framework.h:
+ES_Framework.h:
 
-../ECE118/include/ES_Events.h:
+ES_Events.h:
 
-../ECE118/include/ES_Timers.h:
+ES_Timers.h:
 
-../ECE118/include/ES_CheckEvents.h:
+ES_CheckEvents.h:
 
-../ECE118/include/ES_General.h:
+ES_General.h:
 
-../ECE118/include/ES_KeyboardInput.h:
+ES_KeyboardInput.h:
 
-../ECE118/include/ES_LookupTables.h:
+ES_LookupTables.h:
 
-../ECE118/include/ES_Port.h:
+ES_Port.h:
 
-../ECE118/include/ES_PostList.h:
+ES_PostList.h:
 
-../ECE118/include/ES_PriorTables.h:
+ES_PriorTables.h:
 
-../ECE118/include/ES_Queue.h:
+ES_Queue.h:
 
-../ECE118/include/ES_ServiceHeaders.h:
-
-ES_Configure.h:
+ES_ServiceHeaders.h:
 
 TapeService.h:
 
-ES_Configure.h:
-
-../ECE118/include/RoboHSM.h:
+RoboHSM.h:
 
 BumperService.h:
 
 TrackWireService.h:
 
-../ECE118/include/ES_TattleTale.h:
+ES_TattleTale.h:
 
-../ECE118/include/BOARD.h:
+ES_Configure.h:
 
-RoboHSM.h:
+BOARD.h:
 
 FindDoorSubHSM.h:
 
@@ -61,4 +52,6 @@ DepositSubHSM.h:
 
 Motors.h:
 
-../ECE118/include/IO_Ports.h:
+IO_Ports.h:
+
+BOARD.h:

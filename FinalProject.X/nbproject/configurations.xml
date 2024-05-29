@@ -4,28 +4,6 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/AD.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/BOARD.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_CheckEvents.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_Events.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_Framework.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_General.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_KeyboardInput.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_LookupTables.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_Port.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_PostList.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_PriorTables.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_Queue.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_ServiceHeaders.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_TattleTale.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/ES_Timers.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/IO_Ports.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/LED.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/RC_Servo.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/pwm.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/roach.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/serial.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/include/timers.h</itemPath>
       <itemPath>ES_Configure.h</itemPath>
       <itemPath>TapeService.h</itemPath>
       <itemPath>BumperService.h</itemPath>
@@ -33,44 +11,64 @@
       <itemPath>RoboHSM.h</itemPath>
       <itemPath>DepositSubHSM.h</itemPath>
       <itemPath>Motors.h</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/FinalProject.X/TrackWireService.h</itemPath>
       <itemPath>MowerSubHSM.h</itemPath>
       <itemPath>FindDoorSubHSM.h</itemPath>
+      <itemPath>AD.h</itemPath>
+      <itemPath>BOARD.h</itemPath>
+      <itemPath>ES_CheckEvents.h</itemPath>
+      <itemPath>ES_Events.h</itemPath>
+      <itemPath>ES_Framework.h</itemPath>
+      <itemPath>ES_General.h</itemPath>
+      <itemPath>ES_KeyboardInput.h</itemPath>
+      <itemPath>ES_LookupTables.h</itemPath>
+      <itemPath>ES_Port.h</itemPath>
+      <itemPath>ES_PostList.h</itemPath>
+      <itemPath>ES_PriorTables.h</itemPath>
+      <itemPath>ES_Queue.h</itemPath>
+      <itemPath>ES_ServiceHeaders.h</itemPath>
+      <itemPath>ES_TattleTale.h</itemPath>
+      <itemPath>ES_Timers.h</itemPath>
+      <itemPath>IO_Ports.h</itemPath>
+      <itemPath>LED.h</itemPath>
+      <itemPath>RC_Servo.h</itemPath>
+      <itemPath>pwm.h</itemPath>
+      <itemPath>serial.h</itemPath>
+      <itemPath>timers.h</itemPath>
+      <itemPath>TrackWireService.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/bootloader320.ld</itemPath>
+      <itemPath>bootloader320.ld</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/AD.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/BOARD.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/ES_CheckEvents.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/ES_Framework.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/ES_KeyboardInput.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/ES_PostList.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/ES_Queue.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/ES_TattleTale.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/ES_Timers.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/IO_Ports.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/LED.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/RC_Servo.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/pwm.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/roach.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/serial.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/ECE118/src/timers.c</itemPath>
       <itemPath>RobotMain.c</itemPath>
       <itemPath>TapeService.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/FinalProject.X/RoboHSM.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/FinalProject.X/RoamSubHSM.c</itemPath>
       <itemPath>BumperService.c</itemPath>
       <itemPath>DepositSubHSM.c</itemPath>
       <itemPath>Motors.c</itemPath>
-      <itemPath>C:/Users/jeemcast/OneDrive - ucsc.edu/FinalProject.X/TrackWireService.c</itemPath>
       <itemPath>MowerSubHSM.c</itemPath>
+      <itemPath>../../ECE118/src/AD.c</itemPath>
+      <itemPath>../../ECE118/src/BOARD.c</itemPath>
+      <itemPath>../../ECE118/src/ES_CheckEvents.c</itemPath>
+      <itemPath>../../ECE118/src/ES_Framework.c</itemPath>
+      <itemPath>../../ECE118/src/ES_KeyboardInput.c</itemPath>
+      <itemPath>../../ECE118/src/ES_PostList.c</itemPath>
+      <itemPath>../../ECE118/src/ES_Queue.c</itemPath>
+      <itemPath>../../ECE118/src/ES_TattleTale.c</itemPath>
+      <itemPath>../../ECE118/src/ES_Timers.c</itemPath>
+      <itemPath>../../ECE118/src/IO_Ports.c</itemPath>
+      <itemPath>../../ECE118/src/LED.c</itemPath>
+      <itemPath>../../ECE118/src/RC_Servo.c</itemPath>
+      <itemPath>../../ECE118/src/pwm.c</itemPath>
+      <itemPath>../../ECE118/src/roach.c</itemPath>
+      <itemPath>../../ECE118/src/serial.c</itemPath>
+      <itemPath>../../ECE118/src/timers.c</itemPath>
       <itemPath>FindDoorSubHSM.c</itemPath>
+      <itemPath>RoamSubHSM.c</itemPath>
+      <itemPath>TrackWireService.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -82,6 +80,8 @@
     <Elem>C:\Users\jeemcast\OneDrive - ucsc.edu\ECE118</Elem>
     <Elem>.</Elem>
     <Elem>C:\Users\jeemcast\OneDrive - ucsc.edu\TestingProject.X</Elem>
+    <Elem>../../ECE118</Elem>
+    <Elem>../../Users/gxjacobs/OneDrive - ucsc.edu/FinalProject.X</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -119,7 +119,7 @@
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>true</makeCustomizationPreStepEnabled>
         <makeUseCleanTarget>false</makeUseCleanTarget>
-        <makeCustomizationPreStep>python C:\Users\jeemcast\ECE118\scripts\Enum_To_String.py</makeCustomizationPreStep>
+        <makeCustomizationPreStep>python C:\ECE118\scripts\Enum_To_String.py</makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
@@ -134,7 +134,7 @@
         <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
-        <property key="extra-include-directories" value=".;..\ECE118\include"/>
+        <property key="extra-include-directories" value=".;..\..\ECE118"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="false"/>

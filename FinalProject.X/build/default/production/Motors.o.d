@@ -1,18 +1,16 @@
-build/default/production/Motors.o: Motors.c ../ECE118/include/pwm.h \
- Motors.h ES_Configure.h ../ECE118/include/IO_Ports.h \
- ../ECE118/include/BOARD.h ../ECE118/include/AD.h \
- ../ECE118/include/serial.h
+build/default/production/Motors.o: Motors.c pwm.h Motors.h ES_Configure.h \
+ IO_Ports.h BOARD.h AD.h serial.h
 
-../ECE118/include/pwm.h:
+pwm.h:
 
 Motors.h:
 
 ES_Configure.h:
 
-../ECE118/include/IO_Ports.h:
+IO_Ports.h:
 
-../ECE118/include/BOARD.h:
+BOARD.h:
 
-../ECE118/include/AD.h:
+AD.h:
 
-../ECE118/include/serial.h:
+serial.h:
