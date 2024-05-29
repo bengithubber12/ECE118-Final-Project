@@ -81,7 +81,7 @@ static const char *StateNames[] = {
 #define ONE_SECOND 1000
 #define TURN_TIMER 2
 #define BUMPER_TIMER 2
-#define ROAM_TIME 30000 // 1 min 30 seconds
+#define ROAM_TIME 300000 // 1 min 30 seconds
 
 //Tape Definitions
 #define LeftTape 1
@@ -125,6 +125,7 @@ static uint8_t MyPriority;
 static uint8_t lastEvent = 0;
 static uint8_t curMotorBias; // Motor bias represents left(0) and right(1) sway for the bot
 static uint8_t turning;
+
 /*******************************************************************************
  * PUBLIC FUNCTIONS                                                            *
  ******************************************************************************/
@@ -171,6 +172,7 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
 
         case FREE_ROAM: // in the first state, replace this with correct names
             // right 
+            beltDriveMax();
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
                     roboSway(curMotorBias);
@@ -195,16 +197,16 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             break;
 
         case TAPE_HANDLER: // Handles tape detection
-            tapeRead = ((PORTZ11_BIT << 5) | ((PORTZ09_BIT << 4) | (PORTZ07_BIT << 3) | (PORTZ05_BIT << 2) | (PORTZ08_BIT << 1) | (PORTZ06_BIT) ));
+            tapeRead = ((PORTZ11_BIT << 5) | ((PORTZ09_BIT << 4) | ((PORTZ07_BIT << 3) | ((PORTZ05_BIT << 2) | ((PORTZ08_BIT << 1) | ((PORTZ06_BIT) ))))));
             //Determine which tape sensor is triggered
             if ((int)tapeRead == LeftTape) {// ONLY Left Tape Sensor Triggered
-                pivotBackRight();
+                tankTurnRight();
                 //printf("Front Left Tape Sensor\r\n");
             } else if (((int)tapeRead == TopLeftTape || (int)tapeRead == BothLeftTape)) {// Front TOP Left or (Top Left and Left) Triggered
                 tankTurnRight();
                 //printf("Top Left Tape Sensor\r\n");
             } else if (((int)tapeRead == TopRightTape)) {// ONLY TOP Right Tape Sensor Triggered
-                pivotBackLeft();
+                tankTurnLeft();
                 //printf("Front Right Tape Sensor\r\n");
             } else if ((int)tapeRead == RightTape || (int)tapeRead == BothRightTape) {// Front TOP Right or (Top Right and Front Right) Triggered
                 tankTurnLeft();
@@ -212,19 +214,18 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             } else if (((int)tapeRead == BothTopTape) || (int)tapeRead == AllFrontTape) { //Either All front tape sensors are triggered or just front tape sensors
                 goBackward();
             }
-
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(TURN_TIMER, ONE_SECOND);
+                    ES_Timer_InitTimer(TURN_TIMER, HALF_SECOND);
                     break;
 
                 case ES_EXIT:
-                    ES_Timer_SetTimer(TURN_TIMER, ONE_SECOND);
+                    ES_Timer_SetTimer(TURN_TIMER, HALF_SECOND);
                     break;
 
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == TURN_TIMER) {
-                        //curMotorBias ^= 1;
+                        curMotorBias ^= 1;
                         //roboSway(curMotorBias); 
                         //printf("Tape timer done\r\n");
                         nextState = FREE_ROAM;
@@ -249,10 +250,10 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             bumperRead = ((PORTX09_BIT << 3) | ((PORTX05_BIT << 2) | ((PORTX06_BIT << 1) | PORTX10_BIT)));
             //Determine which bumper is triggered
             if ((int) bumperRead == FLB) {// Front Left Bumper
-                pivotBackRight();
+                pivotBackLeft();
                 //printf("Front Left Bumper\r\n");
             } else if ((int) bumperRead == FRB) {// Front Right Bumper
-                pivotBackLeft();
+                pivotBackRight();
                 //printf("Front Right Bumper\r\n");
             } else if (((int) bumperRead == FrontBumpers)) {//Both Front Bumpers
                 goBackward();
@@ -267,16 +268,16 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                 //run();
                 //printf("Both Back Bumpers\r\n");
             } else if ((int) bumperRead == 9) {// BL and Front Left Bumper
-                pivotBackRight();
+                pivotBackLeft();
                 //printf("BL and Front Left Bumper\r\n");
             } else if ((int) bumperRead == 10) {// BL and Front Right Bumper
-                pivotBackLeft();
+                pivotBackRight();
                 //printf("BL and Front Right Bumper\r\n");
             } else if ((int) bumperRead == BacksAndFR) {// Backs and Front Right Bumper
-                pivotBackLeft();
+                pivotBackRight();
                 //printf("Both back and Front Right Bumper\r\n");
             } else if ((int) bumperRead == BacksAndFL) {// Backs and Front Left Bumper
-                pivotBackRight();
+                pivotBackLeft();
                 //printf("Both back and Front Left Bumper\r\n");
             }
             switch (ThisEvent.EventType) {
