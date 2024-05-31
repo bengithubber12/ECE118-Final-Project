@@ -84,18 +84,21 @@ static const char *StateNames[] = {
 #define ROAM_TIME 30000 // 1 min 30 seconds
 
 //Tape Definitions
-#define LeftTape 1
-#define TopLeftTape 2
-#define BothLeftTape 3
-#define TopRightTape 4
-#define BothTopTape 6 
-#define RightTape 8
-#define BothRightTape 12
-#define AllFrontTape 15
-#define BackRightTape 16
-#define BothRightTape 24
-#define BackLeftTape 32
-#define BothLeftTape 33
+#define LeftTape 0x01
+#define TopLeftTape 0x02
+#define L_TL_Tape 0x03
+#define TopRightTape 0x04
+#define BothTopTape 0x06 
+#define RightTape 0x08
+#define TR_R_Tape 0x0C 
+#define AllTopSensors 0x0F
+#define BackRightTape 0x10
+#define BothRightTape 0x18
+#define AllRight 0x1C
+#define BackLeftTape 0x20
+#define BothLeftTape 0x21
+#define AllLeft 0x23
+#define BothBackTape 0x30
 
 //Bumper Definitions
 #define FLB 1
@@ -195,7 +198,7 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             break;
 
         case TAPE_HANDLER: // Handles tape detection
-            tapeRead = ((PORTZ11_BIT << 5) | ((PORTZ09_BIT << 4) | (PORTZ07_BIT << 3) | (PORTZ05_BIT << 2) | (PORTZ08_BIT << 1) | (PORTZ06_BIT) ));
+            tapeRead = ((PORTZ11_BIT << 5)  | ((PORTZ09_BIT << 4) | (PORTZ07_BIT << 3) | (PORTZ05_BIT << 2) | (PORTZ08_BIT << 1) | (PORTZ06_BIT) ));
             //Determine which tape sensor is triggered
             if ((int)tapeRead == LeftTape) {// ONLY Left Tape Sensor Triggered
                 pivotBackRight();
@@ -209,7 +212,7 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             } else if ((int)tapeRead == RightTape || (int)tapeRead == BothRightTape) {// Front TOP Right or (Top Right and Front Right) Triggered
                 tankTurnLeft();
                 //printf("Top Right Tape Sensor\r\n");
-            } else if (((int)tapeRead == BothTopTape) || (int)tapeRead == AllFrontTape) { //Either All front tape sensors are triggered or just front tape sensors
+            } else if (((int)tapeRead == BothTopTape)) { //Either All front tape sensors are triggered or just front tape sensors
                 goBackward();
             }
 
@@ -246,7 +249,8 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
 
         case BUMPER_HANDLER: // Handles bumper detection
 
-            bumperRead = ((PORTX09_BIT << 3) | ((PORTX05_BIT << 2) | ((PORTX06_BIT << 1) | PORTX10_BIT)));
+            bumperRead = ~((PORTX08_BIT << 7) | ((PORTX06_BIT << 6) | ((PORTX05_BIT << 5) | (PORTX12_BIT << 4) | (PORTX11_BIT << 3) | ((PORTX04_BIT << 2) | ((PORTX03_BIT << 1) | PORTX10_BIT)))));
+             
             //Determine which bumper is triggered
             if ((int) bumperRead == FLB) {// Front Left Bumper
                 pivotBackRight();
