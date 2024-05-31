@@ -13,8 +13,8 @@
 #include "serial.h" 
 
 /////* PRIVATE DEFINITIONS */////
-#define SPEEDRIGHT 100
-#define SPEEDLEFT 100
+#define SPEEDRIGHT 90
+#define SPEEDLEFT 90
 #define FORWARD 1
 #define BACKWARD -1
 #define ROBOT_MAXSPEED 100

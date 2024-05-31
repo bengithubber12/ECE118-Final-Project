@@ -44,8 +44,8 @@ uint8_t InitTapeService(uint8_t Priority) {
     PORTZ08_TRIS = 1;  //TapeTopLeft
     PORTZ05_TRIS = 1;  //TapeTopRight 
     PORTZ07_TRIS = 1;  //TapeRight
-    //PORTZ09_TRIS = 1;  //TapeBackRight
-    //PORTZ11_TRIS = 1;  //TapeBackLeft
+    PORTZ09_TRIS = 1;  //TapeBackRight
+    PORTZ11_TRIS = 1;  //TapeBackLeft
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -145,8 +145,8 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
                 ReturnEvent.EventParam = curEvent;
 
                 lastEvent = curEvent;
-                PostRoboTopHSM(ReturnEvent);
-                //PostTapeService(ReturnEvent);
+                //PostRoboTopHSM(ReturnEvent);
+                PostTapeService(ReturnEvent);
             }
             break;
 

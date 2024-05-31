@@ -19,12 +19,15 @@
 
 #define BUMPER_TIMER_TICKS 5
 
-#define FLEFT_BUMP_MASK 1
-#define FRIGHT_BUMP_MASK 2
-#define FRONT_BUMPERS 3
-#define BRIGHT_BUMP_MASK 4
-#define BLEFT_BUMP_MASK 8
-#define BACK_BUMPERS 12 
+#define BOTTOM_FLEFT_BUMP_MASK 0xE
+#define BOTTOM_FRIGHT_BUMP_MASK 0x7
+#define BOTTOM_BRIGHT_BUMP_MASK 0XD
+#define BOTTOM_BLEFT_BUMP_MASK  0xB
+
+#define TOP_FLEFT_BUMP_MASK 0xE0
+#define TOP_FRIGHT_BUMP_MASK 0x70
+#define TOP_BRIGHT_BUMP_MASK 0XD0
+#define TOP_BLEFT_BUMP_MASK  0xB0
 
 static uint8_t MyPriority;
 
@@ -35,16 +38,17 @@ uint8_t InitBumperService(uint8_t Priority)
     ES_Event ThisEvent;
 
     MyPriority = Priority;
-    //Setup bumper pins
-    PORTX10_TRIS = 1;  //front left
-    PORTX09_TRIS = 1;  //back left
-    PORTX06_TRIS = 1;  //front right
-    PORTX05_TRIS = 1;  //back right
+    //Setup bottom bumper pins
+    PORTX10_TRIS = 1;  //bottom front left
+    PORTX11_TRIS = 1;  //bottom back left
+    PORTX03_TRIS = 1;  //bottom front right
+    PORTX04_TRIS = 1;  //bottom back right
     
-    //PORTX10_LAT = 0;  //front left
-    //PORTX09_LAT = 0;  //back left
-    //PORTX06_LAT = 0;  //front right
-    //PORTX05_LAT = 0;  //back right
+    PORTX12_TRIS = 1;  //top front left
+    PORTX08_TRIS = 1;  //top back left
+    PORTX05_TRIS = 1;  //top front right
+    PORTX06_TRIS = 1;  //top back right
+    
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -67,7 +71,7 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
     uint8_t curEvent;
     unsigned char bumperRead = 0x00;
     //array of all readings 
-    bumperRead = ((PORTX09_BIT << 3) | ((PORTX05_BIT << 2) | ((PORTX06_BIT << 1) | PORTX10_BIT)));
+    bumperRead = ~((PORTX08_BIT << 7) | ((PORTX06_BIT << 6) | ((PORTX05_BIT << 5) | (PORTX12_BIT << 4) | (PORTX11_BIT << 3) | ((PORTX04_BIT << 2) | ((PORTX03_BIT << 1) | PORTX10_BIT)))));
     
     switch(ThisEvent.EventType){
         case ES_INIT:
@@ -79,39 +83,66 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
         case ES_TIMEOUT:
             ES_Timer_InitTimer(BUMPER_SERVICE_TIMER, BUMPER_TIMER_TICKS); // runs every 5ms
             curEvent = 0x00;
-            //printf("BumperRead: %d\r\n", bumperRead);
+            //printf("BumperRead: %x\r\n", bumperRead);
             //Front Left Bumper
-            if (bumperRead & FLEFT_BUMP_MASK) {
+            if (bumperRead & BOTTOM_FLEFT_BUMP_MASK) {
                 //printf("FLB Triggered.\r\n");
-                curEvent |= (1 << 0); //1
-            }else {
                 curEvent &= ~(1 << 0);
+            }else {
+                curEvent |= (1 << 0);
             }
             
             //Front Right Bumper
-            if (bumperRead & FRIGHT_BUMP_MASK) {
+            if (bumperRead & BOTTOM_FRIGHT_BUMP_MASK) {
                 //printf("FRB Triggered.\r\n");
-                curEvent |= (1 << 1); //2
+                curEvent &= ~(1 << 1); //2
             } else {
-                curEvent &= ~(1 << 1);
+                curEvent |= (1 << 1);
             }
             
             //Back Right Bumper 
-            if (bumperRead & BRIGHT_BUMP_MASK) {
+            if (bumperRead & BOTTOM_BRIGHT_BUMP_MASK) {
                 //printf("BRB Triggered.\r\n");
-                curEvent |= (1 << 2); //4 
+                curEvent &= ~(1 << 2); //4 
             } else {
-                curEvent &= ~(1 << 2);
+                curEvent |= (1 << 2);
             }
             
             //Back Left Bumper
-            if (bumperRead & BLEFT_BUMP_MASK) {
+            if (bumperRead & BOTTOM_BLEFT_BUMP_MASK) {
                 //printf("BLB Triggered.\r\n");
-                curEvent |= (1 << 3);
+                curEvent &= ~(1 << 3);  //8
             } else {
-                curEvent &= ~(1 << 3);
+                curEvent |= (1 << 3);
             }
             
+            if (bumperRead & TOP_FLEFT_BUMP_MASK) {
+                //printf("FLB Triggered.\r\n");
+                curEvent &= ~(1 << 4); //10
+            }else {
+                curEvent |= (1 << 4);
+            }
+            
+            if (bumperRead & TOP_FRIGHT_BUMP_MASK) {
+                //printf("FRB Triggered.\r\n");
+                curEvent &= ~(1 << 5); //20
+            } else {
+                curEvent |= (1 << 5);
+            }
+             
+            if (bumperRead & TOP_BRIGHT_BUMP_MASK) {
+                //printf("BRB Triggered.\r\n");
+                curEvent &= ~(1 << 6); //40
+            } else {
+                curEvent |= (1 << 6);
+            }
+
+            if (bumperRead & TOP_BLEFT_BUMP_MASK) {
+                //printf("BLB Triggered.\r\n");
+                curEvent &= ~(1 << 7);  //80
+            } else {
+                curEvent |= (1 << 7);
+            }
             /*
             else if (bumperRead & FRONT_BUMPERS) {
                 //printf("Front bumpers Triggered\r\n");
@@ -126,15 +157,16 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
                 ReturnEvent.EventType = BUMPER_STATUS_CHANGE;
                 ReturnEvent.EventParam = curEvent;
                 lastEvent = curEvent;
-                PostRoboTopHSM(ReturnEvent);
-                //PostBumperService(ReturnEvent);
+                //printf("BumperRead: %x\r\n", bumperRead);
+                //PostRoboTopHSM(ReturnEvent);
+                PostBumperService(ReturnEvent);
             }
             break;
 
-//        default:
-//            printf("\r\nEvent: %s\tParam: 0x%X",
-//            EventNames[ThisEvent.EventType], ThisEvent.EventParam);
-//            break;
+        default:
+            printf("\r\nEvent: %s\tParam: 0x%X",
+            EventNames[ThisEvent.EventType], ThisEvent.EventParam);
+            break;
     }
     return ReturnEvent;
 }
