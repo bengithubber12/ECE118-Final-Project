@@ -154,6 +154,7 @@ uint8_t InitFindDoorSubHSM(void) {
 ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
     uint8_t makeTransition = FALSE; // use to flag transition
     FindDoorSubHSMState_t nextState; // <- change type to correct enum
+    unsigned char tapeRead;
     unsigned char bumperRead;
     ES_Tattle(); // trace call stack
 
@@ -202,17 +203,19 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
             break;
 
         case ALIGN: //State used to aline robot so it follows the tape going left
+
+            tapeRead = ((PORTZ11_BIT << 5) | (PORTZ09_BIT << 4) | (PORTZ07_BIT << 3) | (PORTZ05_BIT << 2) | (PORTZ08_BIT << 1) | PORTZ06_BIT);
             //Determine which tape sensor is triggered
-            if (ThisEvent.EventParam == LeftTape) {// ONLY Left Tape Triggered
+            if ((int)tapeRead == LeftTape) {// ONLY Left Tape Triggered
                 pivotBackRight();
                 //printf("Left Tape Sensor\r\n");
-            } else if (ThisEvent.EventParam == TopLeftTape) {// ONLY Top Left Triggered
+            } else if ((int)tapeRead == TopLeftTape) {// ONLY Top Left Triggered
                 pivotBackRight();
                 //printf("Top Left Tape Sensor\r\n");
-            } else if ((ThisEvent.EventParam == TopRightTape)) { //ONLY Top Right Triggered
+            } else if ((int)tapeRead == TopRightTape) { //ONLY Top Right Triggered
                 pivotBackLeft();
                 //printf("Top Right Tape Sensor\r\n");
-            } else if ((ThisEvent.EventParam == RightTape)) { //ONLY Right Tape Triggered
+            } else if ((int)tapeRead == RightTape) { //ONLY Right Tape Triggered
                 nextState = FOLLOW_TAPE;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
@@ -221,7 +224,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                 //  pivotForwardRight();
                 //printf("Back Left Tape Sensor\r\n");
                 //} 
-            else if (ThisEvent.EventParam == RightTape && (ThisEvent.EventParam == TopRightTape || ThisEvent.EventParam == TopLeftTape)) {// Both Right Tape Triggered
+            else if ((int)tapeRead == (RightTape & (TopRightTape |TopLeftTape))) {// Both Right Tape Triggered
                 //pivotBackRight();
                 nextState = CORNER_TURN;
                 makeTransition = TRUE;
@@ -323,8 +326,9 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
             break;
 
         case BUMPER_HANDLER:
-            //Determine which bumper is triggered
+            //Read the current bumpers
             bumperRead = ((PORTX09_BIT << 3) | ((PORTX05_BIT << 2) | ((PORTX06_BIT << 1) | PORTX10_BIT)));
+            
             //Determine which bumper is triggered
             if ((int) bumperRead == FLB) {// Front Left Bumper
                 pivotBackRight();
