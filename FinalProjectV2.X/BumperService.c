@@ -17,17 +17,7 @@
 #include <xc.h>
 #include "Motors.h"
 
-#define BUMPER_TIMER_TICKS 5
-
-#define BOTTOM_FLEFT_BUMP_MASK 0xE
-#define BOTTOM_FRIGHT_BUMP_MASK 0x7
-#define BOTTOM_BRIGHT_BUMP_MASK 0XD
-#define BOTTOM_BLEFT_BUMP_MASK  0xB
-
-#define TOP_FLEFT_BUMP_MASK 0xE0
-#define TOP_FRIGHT_BUMP_MASK 0x70
-#define TOP_BRIGHT_BUMP_MASK 0XD0
-#define TOP_BLEFT_BUMP_MASK  0xB0
+#define BUMPER_TIMER_TICKS 15
 
 static uint8_t MyPriority;
 
@@ -71,7 +61,7 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
     uint8_t curEvent;
     unsigned char bumperRead = 0x00;
     //array of all readings 
-    bumperRead = ~((PORTX08_BIT << 7) | ((PORTX06_BIT << 6) | ((PORTX05_BIT << 5) | (PORTX12_BIT << 4) | (PORTX11_BIT << 3) | ((PORTX04_BIT << 2) | ((PORTX03_BIT << 1) | PORTX10_BIT)))));
+    
     
     switch(ThisEvent.EventType){
         case ES_INIT:
@@ -82,9 +72,10 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
             break;
         case ES_TIMEOUT:
             ES_Timer_InitTimer(BUMPER_SERVICE_TIMER, BUMPER_TIMER_TICKS); // runs every 5ms
-            curEvent = 0x00;
+            curEvent = ~((PORTX08_BIT << 7) | ((PORTX06_BIT << 6) | ((PORTX05_BIT << 5) | ((PORTX12_BIT << 4) | ((PORTX11_BIT << 3) | ((PORTX04_BIT << 2) | ((PORTX03_BIT << 1) | PORTX10_BIT)))))));
             //printf("BumperRead: %x\r\n", bumperRead);
             //Front Left Bumper
+            /*
             if (bumperRead & BOTTOM_FLEFT_BUMP_MASK) {
                 //printf("FLB Triggered.\r\n");
                 curEvent &= ~(1 << 0);
@@ -143,6 +134,7 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
             } else {
                 curEvent |= (1 << 7);
             }
+             * */
             /*
             else if (bumperRead & FRONT_BUMPERS) {
                 //printf("Front bumpers Triggered\r\n");
@@ -158,8 +150,8 @@ ES_Event RunBumperService(ES_Event ThisEvent) {
                 ReturnEvent.EventParam = curEvent;
                 lastEvent = curEvent;
                 //printf("BumperRead: %x\r\n", bumperRead);
-                //PostRoboTopHSM(ReturnEvent);
-                PostBumperService(ReturnEvent);
+                PostRoboTopHSM(ReturnEvent);
+                //PostBumperService(ReturnEvent);
             }
             break;
 

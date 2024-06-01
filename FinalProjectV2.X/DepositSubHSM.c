@@ -62,13 +62,18 @@ static const char *StateNames[] = {
 #define BACK_UP_TIMER 6
 
 //Bumper Definitions
-#define FLB 1
-#define FRB 2
-#define FrontBumpers 3
-#define BRB 4
-#define BLB 8
-#define BackBumpers 12
-
+#define TOP_FLB 0x10
+#define TOP_FRB 0x20
+#define TOP_FrontBumpers 0x30
+#define BOT_FLB 0x01
+#define BOT_FRB 0x02
+#define BOT_FrontBumpers 0x03
+#define TOP_BRB 0x40
+#define TOP_BLB 0x80
+#define TOP_BackBumpers 0xC0
+#define BOT_BRB 0x4
+#define BOT_BLB 0x8
+#define BOT_BackBumpers 0xC
 /*******************************************************************************
  * PRIVATE FUNCTION PROTOTYPES                                                 *
  ******************************************************************************/
@@ -200,15 +205,15 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
                 
                 case BUMPER_STATUS_CHANGE: //if back bumpers hit
                     switch (ThisEvent.EventParam) {
-                        case BRB:
+                        case BOT_BRB:
                             //servo stuff
                             stop();
                             break;
-                        case BLB:
+                        case BOT_BLB:
                             //servo stuff
                             stop();
                             break;
-                        case BackBumpers: 
+                        case BOT_BackBumpers: 
                             //servo stuff
                             stop();
                             break;

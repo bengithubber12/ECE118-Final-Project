@@ -71,11 +71,11 @@ static const char *StateNames[] = {
 //Tape Definitions
 #define LeftTape 0x01
 #define TopLeftTape 0x02
-#define L_TL_Tape 0x03
+#define SIDE_L_Tape 0x03
 #define TopRightTape 0x04
 #define BothTopTape 0x06 
 #define RightTape 0x08
-#define TR_R_Tape 0x0C 
+#define SIDE_R_Tape 0x0C 
 #define AllTopSensors 0x0F
 #define BackRightTape 0x10
 #define BothRightTape 0x18
@@ -86,14 +86,18 @@ static const char *StateNames[] = {
 #define BothBackTape 0x30
 
 //Bumper Definitions
-#define FLB 1
-#define FRB 2
-#define FrontBumpers 3
-#define BRB 4
-#define BLB 8
-#define BackBumpers 12
-#define BacksAndFR 14
-#define BacksAndFL 13
+#define TOP_FLB 0x10
+#define TOP_FRB 0x20
+#define TOP_FrontBumpers 0x30
+#define BOT_FLB 0x1
+#define BOT_FRB 0x2
+#define BOT_FrontBumpers 0x3
+#define TOP_BRB 0x40
+#define TOP_BLB 0x80
+#define TOP_BackBumpers 0xC0
+#define BOT_BRB 0x4
+#define BOT_BLB 0x8
+#define BOT_BackBumpers 0xC
 
 /*******************************************************************************
  * PRIVATE FUNCTION PROTOTYPES                                                 *
@@ -174,7 +178,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
             break;
 
         case FIND_TAPE: // in the first state, replace this with correct names
-            //run();
+            slightRightDrive();
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
                     break;
@@ -203,8 +207,8 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
             break;
 
         case ALIGN: //State used to aline robot so it follows the tape going left
-
-            tapeRead = ((PORTZ11_BIT << 5) | (PORTZ09_BIT << 4) | (PORTZ07_BIT << 3) | (PORTZ05_BIT << 2) | (PORTZ08_BIT << 1) | PORTZ06_BIT);
+            tapeRead = ((PORTZ11_BIT << 5) | ((PORTZ09_BIT << 4) | ((PORTZ07_BIT << 3) | ((PORTZ05_BIT << 2) | ((PORTZ08_BIT << 1) | ((PORTZ06_BIT)))))));
+            
             //Determine which tape sensor is triggered
             if ((int)tapeRead == LeftTape) {// ONLY Left Tape Triggered
                 pivotBackRight();
@@ -215,7 +219,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
             } else if ((int)tapeRead == TopRightTape) { //ONLY Top Right Triggered
                 pivotBackLeft();
                 //printf("Top Right Tape Sensor\r\n");
-            } else if ((int)tapeRead == RightTape) { //ONLY Right Tape Triggered
+            } else if ((int)tapeRead == SIDE_R_Tape) { //Both Side Right Tape Triggered
                 nextState = FOLLOW_TAPE;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
@@ -224,8 +228,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                 //  pivotForwardRight();
                 //printf("Back Left Tape Sensor\r\n");
                 //} 
-            else if ((int)tapeRead == (RightTape & (TopRightTape |TopLeftTape))) {// Both Right Tape Triggered
-                //pivotBackRight();
+            else if ((int)tapeRead == (SIDE_R_Tape & (TopRightTape || TopLeftTape))) {// Both Right Tape Triggered\
                 nextState = CORNER_TURN;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
@@ -247,11 +250,11 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
             switch (ThisEvent.EventType) {
 
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(ADJUST_TIMER, 450);
+                    ES_Timer_InitTimer(ADJUST_TIMER, ONE_SECOND);
                     break;
 
                 case ES_EXIT:
-                    ES_Timer_SetTimer(ADJUST_TIMER, 450);
+                    ES_Timer_SetTimer(ADJUST_TIMER, ONE_SECOND);
                     break;
 
                 case ES_TIMEOUT:
@@ -280,7 +283,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
             break;
 
         case FOLLOW_TAPE:
-            slightRightDrive();
+            run();
             switch (ThisEvent.EventType) {
                 case TAPE_STATUS_CHANGE:
                     nextState = ALIGN;
@@ -327,40 +330,50 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
 
         case BUMPER_HANDLER:
             //Read the current bumpers
-            bumperRead = ((PORTX09_BIT << 3) | ((PORTX05_BIT << 2) | ((PORTX06_BIT << 1) | PORTX10_BIT)));
+            bumperRead = ~((PORTX08_BIT << 7) | ((PORTX06_BIT << 6) | ((PORTX05_BIT << 5) | ((PORTX12_BIT << 4) | ((PORTX11_BIT << 3) | ((PORTX04_BIT << 2) | ((PORTX03_BIT << 1) | PORTX10_BIT)))))));
             
             //Determine which bumper is triggered
-            if ((int) bumperRead == FLB) {// Front Left Bumper
+            if ((int) bumperRead == BOT_FLB) {// Bottom Front Left Bumper
                 pivotBackRight();
                 //printf("Front Left Bumper\r\n");
-            } else if ((int) bumperRead == FRB) {// Front Right Bumper
+            } else if ((int) bumperRead == BOT_FRB) {// Bottom Front Right Bumper
                 pivotBackLeft();
                 //printf("Front Right Bumper\r\n");
-            } else if (((int) bumperRead == FrontBumpers)) {//Both Front Bumpers
-                goBackward();
+            } else if (((int) bumperRead == BOT_FrontBumpers)) {//Both Bottom Front Bumpers
+                nextState = TRACK_WIRE_SEQUENCE;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
                 //printf("Both Front Bumpers\r\n");
-            } else if ((int) bumperRead == BRB) {// Back Right Bumper
-                //run();
+            } else if ((int) bumperRead == BOT_BRB) {// Back Bottom Right Bumper
+                pivotForwardRight();
                 //printf("Back Right Bumper\r\n");
-            } else if ((int) bumperRead == BLB) {// Back Left Bumper
-                //run();
+            } else if ((int) bumperRead == BOT_BLB) {// Back Bottom Left Bumper
+                pivotForwardLeft();
                 //printf("Back Left Bumper\r\n");
-            } else if ((int) bumperRead == BackBumpers) {// Both Back Bumpers
-                //run();
+            } else if ((int) bumperRead == BOT_BackBumpers) {// Both Bottom Back Bumpers
+                run();
                 //printf("Both Back Bumpers\r\n");
-            } else if ((int) bumperRead == 9) {// BL and Front Left Bumper
-                pivotBackRight();
-                //printf("BL and Front Left Bumper\r\n");
-            } else if ((int) bumperRead == 10) {// BL and Front Right Bumper
+                
+            //Obstacle detection cases
+            } else if ((int) bumperRead == (TOP_FLB && BOT_FLB)) {// Front Left Hit
                 pivotBackLeft();
-                //printf("BL and Front Right Bumper\r\n");
-            } else if ((int) bumperRead == BacksAndFR) {// Backs and Front Right Bumper
+                //printf("Front Right Bumper\r\n");
+            } else if ((int) bumperRead == (TOP_FRB && BOT_FRB)) {// Front Right Hit
                 pivotBackLeft();
-                //printf("Both back and Front Right Bumper\r\n");
-            } else if ((int) bumperRead == BacksAndFL) {// Backs and Front Left Bumper
-                pivotBackRight();
-                //printf("Both back and Front Left Bumper\r\n");
-            }
+                //printf("Front Right Bumper\r\n");
+            } else if (((int) bumperRead == (TOP_FrontBumpers && BOT_FrontBumpers))) {// Head Hit
+                tankTurnLeft();
+                //printf("Both Front Bumpers\r\n");
+            } else if ((int) bumperRead == (TOP_BLB && BOT_BLB)) {// Back Left Hit
+                pivotForwardRight();
+                //printf("Back Right Bumper\r\n");
+            } else if ((int) bumperRead == (TOP_BRB && BOT_BRB)) {// Back Right Hit
+                pivotForwardLeft();
+                //printf("Back Left Bumper\r\n");
+            } else if ((int) bumperRead == (TOP_BackBumpers && BOT_BackBumpers)) {// Back Hit
+                run();
+                //printf("Both Back Bumpers\r\n");
+            } 
 
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:

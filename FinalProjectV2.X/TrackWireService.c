@@ -31,7 +31,7 @@ uint8_t InitTWService(uint8_t Priority)
     AD_AddPins(AD_PORTW8);
     
     //Init timer
-    ES_Timer_InitTimer(TRACK_WIRE_SERVICE_TIMER, TW_TICKS);
+    //ES_Timer_InitTimer(TRACK_WIRE_SERVICE_TIMER, TW_TICKS);
     
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -82,8 +82,8 @@ ES_Event RunTWService(ES_Event ThisEvent) {
             break;
             
         default:
-            //printf("\r\nEvent: %s\tParam: 0x%X",
-            //EventNames[ThisEvent.EventType], ThisEvent.EventParam);
+            printf("\r\nEvent: %s\tParam: 0x%X",
+            EventNames[ThisEvent.EventType], ThisEvent.EventParam);
             break;
     }
     return ReturnEvent;

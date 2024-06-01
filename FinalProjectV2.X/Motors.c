@@ -14,13 +14,13 @@
 
 /////* PRIVATE DEFINITIONS */////
 #define SPEEDRIGHT 90
-#define SPEEDLEFT 90
+#define SPEEDLEFT 100
 #define FORWARD 1
 #define BACKWARD -1
 #define ROBOT_MAXSPEED 100
 
 //LEFT AND RIGHT MOTOR DEFINITIONS
-#define ROBOT_RIGHT_PWM PWM_PORTY10
+#define ROBOT_RIGHT_PWM PWM_PORTY04
 #define ROBOT_LEFT_PWM PWM_PORTY12 
 #define ROBOT_RIGHT_DIR PORTV03_LAT 
 #define ROBOT_RIGHT_DIR_INV PORTV04_LAT 
@@ -33,7 +33,7 @@
 #define ROBOT_LEFT_DIR_INV_TRIS PORTV08_TRIS 
 
 //BELT DRIVE MOTOR DEFINITIONS
-#define BELT_DRIVE_PWM PWM_PORTY04
+#define BELT_DRIVE_PWM PWM_PORTY10
 #define BELT_DRIVE_DIR PORTV05_LAT 
 #define BELT_DRIVE_DIR_INV PORTV06_LAT
 
@@ -192,5 +192,5 @@ void roboSway(uint8_t bias){
 }
 
 void beltDriveMax(void){
-    RoboBeltMtrSpeed(ROBOT_MAXSPEED * BACKWARD); //Backwards b/c the belt drive needs to roll  balls IN
+    RoboBeltMtrSpeed(90 * FORWARD); //Backwards b/c the belt drive needs to roll  balls IN
 }

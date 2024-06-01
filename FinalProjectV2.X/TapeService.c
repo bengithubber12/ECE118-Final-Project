@@ -64,21 +64,6 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
     ReturnEvent.EventType = ES_NO_EVENT;
     static uint8_t lastEvent = 0x00;
     uint8_t curEvent;
-
-    int TapeLeft = PORTZ06_BIT;
-    //printf("TapeLeft: %d\r\n", TapeLeft);
-    int TapeTopLeft = PORTZ08_BIT;
-    //printf("TapeTopLeft: %d\r\n", TapeTopLeft);
-    int TapeTopRight = PORTZ05_BIT;
-    //printf("TapeTopRight: %d\r\n", TapeTopRight);
-    int TapeRight = PORTZ07_BIT;
-    //printf("TapeRight: %d\r\n", TapeRight);
-    int TapeBackRight = PORTZ09_BIT;
-    //printf("TapeBackRight: %d\r\n", TapeBackRight);
-    int TapeBackLeft = PORTZ11_BIT;  
-    //printf("TapeBackLeft: %d\r\n", TapeBackLeft);
-
-    
     switch (ThisEvent.EventType) {
         case ES_INIT:
             break;
@@ -88,8 +73,8 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
             break;
         case ES_TIMEOUT:
             ES_Timer_InitTimer(TAPE_SERVICE_TIMER, TIMER_1_TICKS); // runs every 5ms
-            curEvent = 0x00;
-
+            curEvent = ((PORTZ11_BIT << 5) | ((PORTZ09_BIT << 4) | ((PORTZ07_BIT << 3) | ((PORTZ05_BIT << 2) | ((PORTZ08_BIT << 1) | ((PORTZ06_BIT)))))));
+               /*
             // check for Left Tape
             if (TapeLeft) {
                 //printf("Left reading: %d\r\n", TapeLeft);
@@ -138,15 +123,15 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
             } else {
                 curEvent &= ~(1 << 5);
             }
-
+            */
             // compare previous and current values
             if (lastEvent != curEvent) {
                 ReturnEvent.EventType = TAPE_STATUS_CHANGE;
                 ReturnEvent.EventParam = curEvent;
 
                 lastEvent = curEvent;
-                //PostRoboTopHSM(ReturnEvent);
-                PostTapeService(ReturnEvent);
+                PostRoboTopHSM(ReturnEvent);
+                //PostTapeService(ReturnEvent);
             }
             break;
 
