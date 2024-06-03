@@ -1,28 +1,3 @@
-/*
- * File: TemplateSubHSM.c
- * Author: J. Edward Carryer
- * Modified: Gabriel H Elkaim
- *
- * Template file to set up a Heirarchical State Machine to work with the Events and
- * Services Framework (ES_Framework) on the Uno32 for the CMPE-118/L class. Note that
- * this file will need to be modified to fit your exact needs, and most of the names
- * will have to be changed to match your code.
- *
- * There is for a substate machine. Make sure it has a unique name
- *
- * This is provided as an example and a good place to start.
- *
- * History
- * When           Who     What/Why
- * -------------- ---     --------
- * 09/13/13 15:17 ghe      added tattletail functionality and recursive calls
- * 01/15/12 11:12 jec      revisions for Gen2 framework
- * 11/07/11 11:26 jec      made the queue static
- * 10/30/11 17:59 jec      fixed references to CurrentEvent in RunTemplateSM()
- * 10/23/11 18:20 jec      began conversion from SMTemplate.c (02/20/07 rev)
- */
-
-
 /*******************************************************************************
  * MODULE #INCLUDE                                                             *
  ******************************************************************************/
@@ -33,24 +8,47 @@
 #include "RoboHSM.h"
 #include "MowerSubHSM.h"
 #include "Motors.h"
+#include "stdio.h"
 
 /*******************************************************************************
  * MODULE #DEFINES                                                             *
  ******************************************************************************/
 typedef enum {
     InitPSubState,
-    FORWARD,
-    ALIGN,
-    CORNER_TURN,
-    FOLLOW_TAPE
-    
+    FTW, // Find Tape or Wall
+
+    //Clockwise States
+    CLK_ALIGN,
+    CLK_TO_TAPE,
+    CLK_AWAY_TAPE,
+    CLK_CORNER_TURN,
+    CLK_WALL_ALIGN,
+    CLK_PARALLEL,
+
+    //Counter Clockwise States
+    CCLK_ALIGN,
+    CCLK_TO_TAPE,
+    CCLK_AWAY_TAPE,
+    CCLK_CORNER_TURN,
+    CCLK_WALL_ALIGN,
+
+
 } MowerSubHSMState_t;
 
 static const char *StateNames[] = {
 	"InitPSubState",
-	"FORWARD",
-	"ALIGN",
-	"CORNER_TURN",
+	"FTW",
+	"CLK_ALIGN",
+	"CLK_TO_TAPE",
+	"CLK_AWAY_TAPE",
+	"CLK_CORNER_TURN",
+	"CLK_WALL_ALIGN",
+	"CLK_PARALLEL",
+	"CCLK_ALIGN",
+	"CCLK_TO_TAPE",
+	"CCLK_AWAY_TAPE",
+	"CCLK_CORNER_TURN",
+	"CCLK_WALL_ALIGN",
 };
 
 //Timer Definitions
@@ -62,25 +60,20 @@ static const char *StateNames[] = {
 #define TURN_TIMER 4
 
 //Tape Definitions
-#define NoTape 0x00
-#define LeftTape 0x01
-#define TopLeftTape 0x02
-#define BothLeftTape 0x03
-#define TopRightTape 0x04
-#define BothTopTape 0x06 
-#define RightTape 0x08
-#define BothRightTape 0x0C
-#define AllFrontTape 0x0F
-#define BackRightTape 0x10
-#define BackLeftTape 0x20
-#define BothBackTape 0x30
+#define NoTape 0x0
+#define FrontLeftTape 0x1
+#define BottomLeftTape 0x8
+#define FrontRightTape 0x2
+#define BottomRightTape 0x4
 
-//extra tape cases
-#define All3RightTape 0x1C
-#define All3LeftTape 0x23
-#define TwoMostRightTape 0x18
-#define TwoMostLeftTape 0x21
+#define BothLeftTape 0x9
+#define BothRightTape 0x6
 
+#define CornerLeftTape 0xB
+#define CornerRightTape 0x7
+
+#define BothBackTape 0xC
+#define BothFrontTape 0x3
 
 //Bumper Definitions
 #define FLB 0x01
@@ -90,6 +83,7 @@ static const char *StateNames[] = {
 #define BLB 0x08
 #define BackBumpers 0x0C
 
+//check bumoer movement based on if on tape or not
 /*******************************************************************************
  * PRIVATE FUNCTION PROTOTYPES                                                 *
  ******************************************************************************/
@@ -120,8 +114,7 @@ static uint8_t MyPriority;
  *        to rename this to something appropriate.
  *        Returns TRUE if successful, FALSE otherwise
  * @author J. Edward Carryer, 2011.10.23 19:25 */
-uint8_t InitMowerSubHSM(void)
-{
+uint8_t InitMowerSubHSM(void) {
     ES_Event returnEvent;
 
     CurrentState = InitPSubState;
@@ -147,124 +140,145 @@ uint8_t InitMowerSubHSM(void)
  *       not consumed as these need to pass pack to the higher level state machine.
  * @author J. Edward Carryer, 2011.10.23 19:25
  * @author Gabriel H Elkaim, 2011.10.23 19:25 */
-ES_Event RunMowerSubHSM(ES_Event ThisEvent)
-{
+ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
     uint8_t makeTransition = FALSE; // use to flag transition
     MowerSubHSMState_t nextState; // <- change type to correct enum
 
     ES_Tattle(); // trace call stack
 
     switch (CurrentState) {
-    case InitPSubState: // If current state is initial Psedudo State
-        if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
-        {
-            // this is where you would put any actions associated with the
-            // transition from the initial pseudo-state into the actual
-            // initial state
+        case InitPSubState: // If current state is initial Psedudo State
+            if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
+            {
+                nextState = FTW;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            }
+            break;
 
-            // now put the machine into the actual initial state
-            nextState = FORWARD;
-            makeTransition = TRUE;
-            ThisEvent.EventType = ES_NO_EVENT;
-        }
-        break;
-
-    case FORWARD: // in the first state, replace this with correct names
-        run();
-        switch (ThisEvent.EventType) {
-        case ES_NO_EVENT:
-        case TAPE_STATUS_CHANGE:
-            nextState = ALIGN;
-            makeTransition = TRUE;
-            ThisEvent.EventType = ES_NO_EVENT;
-            break;
-        case BUMPER_STATUS_CHANGE:
-            break;
-                
-                
-        default: // all unhandled events pass the event back up to the next level
-            break;
-        }
-        break;
-    case ALIGN:
-            //Tape Definitions
-//#define LeftTape 0x01
-//#define TopLeftTape 0x02
-//#define BothLeftTape 0x03
-//#define TopRightTape 0x04
-//#define BothTopTape 0x06 
-//#define RightTape 0x08
-//#define BothRightTape 0x0C
-//#define AllFrontTape 0x0F
-//#define BackRightTape 0x10
-//#define BackLeftTape 0x20
-//#define BothBackTape 0x30
-//
-////extra tape cases
-//#define All3RightTape 0x1C
-//#define All3LeftTape 0x23
-//#define TwoMostRightTape 0x18
-//#define TwoMostLeftTape 0x21
-        switch(ThisEvent.EventType){
-            case ES_ENTRY: 
-                ES_Timer_InitTimer(MOWER_TIMER, QUARTER_SECOND);
-                switch(ThisEvent.EventParam){
-                    case LeftTape:
-                        RoboLeftMtrSpeed(90);
-                        RoboRightMtrSpeed(10);
-                        break;
-                    case TwoMostLeftTape:
-                        RoboLeftMtrSpeed(90);
-                        RoboRightMtrSpeed(10);
-                        break;
-                    case BackLeftTape: 
-                        RoboLeftMtrSpeed(90);
-                        RoboRightMtrSpeed(80);
-                        break;
-                    case All3RightTape:
-                        nextState = CORNER_TURN;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                        break;
-                
-                    default:
-                        break;
-                }
-                
-            case ES_EXIT :
-               ES_Timer_SetTimer(MOWER_TIMER, QUARTER_SECOND);
-               break;
-            case ES_TIMEOUT : 
-                if (ThisEvent.EventParam == MOWER_TIMER){
-                    nextState = FORWARD;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                }
-                break;
-            default :
-                break;
-        }
-        case CORNER_TURN:
-            tankTurnRight();
+        case FTW: // in the first state, replace this with correct names
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(GenericTimer, HALF_SECOND);
+                    run();
                     break;
-                
-                case ES_EXIT:
-                    ES_Timer_SetTimer(GenericTimer, HALF_SECOND);
+                case TAPE_STATUS_CHANGE:
+                    switch (ThisEvent.EventParam) {
+                        case FrontLeftTape:
+                            nextState = CLK_ALIGN;
+                            makeTransition = TRUE;
+                            ThisEvent.EventType = ES_NO_EVENT;
+                            break;
+                        case FrontRightTape:
+                            nextState = CCLK_ALIGN;
+                            makeTransition = TRUE;
+                            ThisEvent.EventType = ES_NO_EVENT;
+                            break;
+                        case BothFrontTape:
+                            break;
+                        default:
+                            break;
+
+                    }
+
                     break;
-                
-                case ES_TIMEOUT:
-                    if (ThisEvent.EventParam == GenericTimer){
-                        nextState = FORWARD;
+                case ES_NO_EVENT:
+                default:
+                    break;
+            }
+            break;
+        case CLK_ALIGN:
+            switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    RoboLeftMtrSpeed(0);
+                    RoboRightMtrSpeed(-40);
+                    break;
+                case TAPE_STATUS_CHANGE:
+                    if (ThisEvent.EventParam == BothLeftTape) {
+                        nextState = CLK_AWAY_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == NoTape) {
+                        nextState = CLK_TO_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == BottomLeftTape){
+                        nextState = CLK_TO_TAPE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
                     break;
-        }
-    default: // all unhandled states fall into here
-        break;
+                case ES_NO_EVENT:
+                default:
+                    break;
+            }
+            break;
+        case CLK_AWAY_TAPE:
+            switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    RoboLeftMtrSpeed(65);
+                    RoboRightMtrSpeed(50);
+                    break;
+                case TAPE_STATUS_CHANGE:
+                    if (ThisEvent.EventParam == BottomLeftTape) {
+                        nextState = CLK_TO_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType == ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == NoTape) {
+                        nextState = CLK_TO_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == BothFrontTape) {
+                        nextState = CLK_CORNER_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+                case ES_NO_EVENT:
+                default:
+                    break;
+            }
+            break;
+        case CLK_TO_TAPE:
+            switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    RoboLeftMtrSpeed(50);
+                    RoboRightMtrSpeed(60);
+                    break;
+                case TAPE_STATUS_CHANGE:
+                    if (ThisEvent.EventParam == FrontLeftTape) {
+                        nextState = CLK_AWAY_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == BothLeftTape) {
+                        nextState = CLK_AWAY_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == BothFrontTape) {
+                        nextState = CLK_CORNER_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+                case ES_NO_EVENT:
+                default:
+                    break;
+            }
+            break;
+        case CLK_CORNER_TURN:
+             switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    RoboLeftMtrSpeed(0);
+                    RoboRightMtrSpeed(0);
+                    break;
+                case TAPE_STATUS_CHANGE:
+                   
+                case ES_NO_EVENT:
+                default:
+                    break;
+            }
+            break;
+        default: // all unhandled states fall into here
+            break;
     } // end switch on Current State
 
     if (makeTransition == TRUE) { // making a state transition, send EXIT and ENTRY
@@ -282,4 +296,5 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent)
 /*******************************************************************************
  * PRIVATE FUNCTIONS                                                           *
  ******************************************************************************/
+
 
