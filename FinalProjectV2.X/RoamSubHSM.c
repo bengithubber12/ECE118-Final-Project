@@ -308,7 +308,7 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             } else if (((int) prevbumperRead == BOT_FrontBumpers) && !BUMPER_TURNING) {//BOTTOM Both Front Bumpers
                 tankTurnLeft();
                 //printf("Both Front Bumpers\r\n");
-            } else if ((int) prevbumperRead == BOT_BRB && !BUMPER_TURNING) {// Back Right Bumper
+            } else if ((int) prevbumperRead == BOT_BRB) {// Back Right Bumper
                 run();
                 //printf("Back Right Bumper\r\n");
             } else if ((int) prevbumperRead == BOT_BLB) {// Back Left Bumper
