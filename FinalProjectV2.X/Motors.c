@@ -13,8 +13,8 @@
 #include "serial.h" 
 
 /////* PRIVATE DEFINITIONS */////
-#define SPEEDRIGHT 90
-#define SPEEDLEFT 100
+#define SPEEDRIGHT 55
+#define SPEEDLEFT 65
 #define FORWARD 1
 #define BACKWARD -1
 #define ROBOT_MAXSPEED 100
@@ -126,8 +126,8 @@ void run(void) {
 }
 
 void goBackward(void) {
-    RoboLeftMtrSpeed(BACKWARD * 90);
-    RoboRightMtrSpeed(BACKWARD * 85);
+    RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
+    RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
 }
 
 void tankTurnRight(void) {
@@ -183,10 +183,10 @@ void slightRightDrive(void) {
 void roboSway(uint8_t bias){
     if (bias == 0){ //Left Sway
         RoboRightMtrSpeed(85);
-        RoboLeftMtrSpeed(ROBOT_MAXSPEED);
+        RoboLeftMtrSpeed(70);
     }
     else if (bias == 1){//Right Sway
-        RoboRightMtrSpeed(ROBOT_MAXSPEED);
+        RoboRightMtrSpeed(85);
         RoboLeftMtrSpeed(75);
     }
 }

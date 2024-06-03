@@ -133,10 +133,12 @@ static uint8_t MyPriority;
 static uint8_t lastEvent = 0;
 static uint8_t curMotorBias; // Motor bias represents left(0) and right(1) sway for the bot
 static uint8_t TURNING = 0;
-static uint8_t BACKUP;
-static uint8_t BUMPER_BACKUP;
-static uint8_t prevTapeRead;
-static uint8_t prevbumperRead;
+static uint8_t BACKUP = 0;
+static uint8_t BUMPER_BACKUP = 0;
+static uint8_t BUMPER_TURNING = 0;
+static uint8_t prevTapeRead = 0;
+static uint8_t prevbumperRead = 0;
+
 
 /*******************************************************************************
  * PUBLIC FUNCTIONS                                                            *
@@ -194,12 +196,16 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                     nextState = TAPE_HANDLER;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
+                    TURNING = 0;
+                    BACKUP = 0;
                     break;
 
                 case BUMPER_STATUS_CHANGE:
                     nextState = BUMPER_HANDLER;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
+                    BUMPER_BACKUP = 0;
+                    BUMPER_TURNING = 0;
                     break;
 
                 default: // all unhandled events pass the event back up to the next level
@@ -233,24 +239,30 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             } else if (((int) prevTapeRead == BothTopTape) && !TURNING) { //Either All front tape sensors are triggered or just front tape sensors
                 goBackward();
                 TURNING = 1;
-            } else if (!BACKUP && (int)tapeRead > 0) {
+            } else if ((int) prevTapeRead == BackLeftTape || (int) prevTapeRead == BothBackTape){
+                pivotForwardLeft();
+                TURNING = 1;
+            } else if ((int) prevTapeRead == BackRightTape){
+                pivotForwardRight();
+                TURNING = 1;
+            }
+            else if (!BACKUP && (int) tapeRead > 0) {
                 printf("made it!\r\n");
                 goBackward();
                 BACKUP = 1;
                 prevTapeRead = tapeRead;
-            } else if ((int)prevTapeRead > 0) {
+            } else if ((int) prevTapeRead > 0) {
                 TURNING = 1;
             }
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(TURN_TIMER, HALF_SECOND + QUARTER_SECOND);
+                    ES_Timer_InitTimer(TURN_TIMER, HALF_SECOND);
                     if (BACKUP == 1) ES_Timer_InitTimer(TURN_TIMER, 400);
                     break;
 
                 case ES_EXIT:
-                    ES_Timer_SetTimer(TURN_TIMER, HALF_SECOND + QUARTER_SECOND);
+                    ES_Timer_SetTimer(TURN_TIMER, HALF_SECOND);
                     if (BACKUP == 1) ES_Timer_SetTimer(TURN_TIMER, 400);
-                   
                     break;
 
                 case ES_TIMEOUT:
@@ -261,9 +273,9 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                             TURNING = 0;
                             nextState = TAPE_HANDLER;
                         } else if (TURNING == 1) {
-                            TURNING = 0;
                             BACKUP = 0;
-                        } 
+                            TURNING = 0;
+                        }
                         curMotorBias ^= 1;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
@@ -274,7 +286,8 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                     nextState = BUMPER_HANDLER;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
-
+                    TURNING = 0;
+                    BACKUP = 0;
                     break;
 
                 default: // all unhandled events pass the event back up to the next level
@@ -285,18 +298,17 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
         case BUMPER_HANDLER: // Handles bumper detection
 
             bumperRead = ~((PORTX08_BIT << 7) | ((PORTX06_BIT << 6) | ((PORTX05_BIT << 5) | (PORTX12_BIT << 4) | (PORTX11_BIT << 3) | ((PORTX04_BIT << 2) | ((PORTX03_BIT << 1) | PORTX10_BIT)))));
-
             //Determine which bumper is triggered
-            if ((int) prevbumperRead == BOT_FLB) {// BOTTOM Front Left Bumper
+            if ((int) prevbumperRead == BOT_FLB && !BUMPER_TURNING) {// BOTTOM Front Left Bumper
                 tankTurnRight();
                 //printf("Front Left Bumper\r\n");
-            } else if ((int) prevbumperRead == BOT_FRB) {//  BOTTOM Front Right Bumper
+            } else if ((int) prevbumperRead == BOT_FRB && !BUMPER_TURNING) {//  BOTTOM Front Right Bumper
                 tankTurnLeft();
                 //printf("Front Right Bumper\r\n");
-            } else if (((int) prevbumperRead == BOT_FrontBumpers)) {//BOTTOM Both Front Bumpers
+            } else if (((int) prevbumperRead == BOT_FrontBumpers) && !BUMPER_TURNING) {//BOTTOM Both Front Bumpers
                 tankTurnLeft();
                 //printf("Both Front Bumpers\r\n");
-            } else if ((int) prevbumperRead == BOT_BRB) {// Back Right Bumper
+            } else if ((int) prevbumperRead == BOT_BRB && !BUMPER_TURNING) {// Back Right Bumper
                 run();
                 //printf("Back Right Bumper\r\n");
             } else if ((int) prevbumperRead == BOT_BLB) {// Back Left Bumper
@@ -305,31 +317,35 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             } else if ((int) prevbumperRead == BOT_BackBumpers) {// Both Back Bumpers
                 run();
                 //printf("Both Back Bumpers\r\n");
-            }  else if (!BUMPER_BACKUP && (int)bumperRead > 0) {
+            } else if (!BUMPER_BACKUP && (int) bumperRead > 0) {
                 printf("made it!\r\n");
                 goBackward();
                 BUMPER_BACKUP = 1;
                 prevbumperRead = bumperRead;
             }
-            
+
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(BUMPER_TIMER, HALF_SECOND + QUARTER_SECOND);
+                    ES_Timer_InitTimer(BUMPER_TIMER, 400);
                     if (BUMPER_BACKUP == 1) ES_Timer_InitTimer(BUMPER_TIMER, 400);
                     break;
 
                 case ES_EXIT:
-                    ES_Timer_SetTimer(BUMPER_TIMER, HALF_SECOND + QUARTER_SECOND);
+                    ES_Timer_SetTimer(BUMPER_TIMER, 400);
                     if (BUMPER_BACKUP == 1) ES_Timer_SetTimer(BUMPER_TIMER, 400);
                     break;
 
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == BUMPER_TIMER) {
                         nextState = FREE_ROAM;
-                        if (BACKUP == 1) {
-                            BACKUP = 2;
+                        if (BUMPER_BACKUP == 1) {
+                            BUMPER_BACKUP = 2;
+                            BUMPER_TURNING = 0;
                             nextState = BUMPER_HANDLER;
-                        } else BACKUP = 0;
+                        } else if (BUMPER_TURNING == 1) {
+                            BUMPER_BACKUP = 0;
+                            BUMPER_TURNING = 0;
+                        }
                         //printf("Bumper timer done\r\n");
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
@@ -340,6 +356,8 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                     nextState = TAPE_HANDLER;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
+                    BUMPER_BACKUP = 0;
+                    BUMPER_TURNING = 0;
                     break;
 
                 default: // all unhandled events pass the event back up to the next level
