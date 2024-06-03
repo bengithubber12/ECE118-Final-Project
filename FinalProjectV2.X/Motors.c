@@ -177,7 +177,7 @@ void stop(void) {
 
 void slightRightDrive(void) {
     RoboLeftMtrSpeed(SPEEDLEFT);
-    RoboRightMtrSpeed(80);
+    RoboRightMtrSpeed(60);
 }
 
 void roboSway(uint8_t bias){

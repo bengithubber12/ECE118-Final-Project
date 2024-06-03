@@ -228,8 +228,8 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                 //  pivotForwardRight();
                 //printf("Back Left Tape Sensor\r\n");
                 //} 
-            else if ((int)tapeRead == (SIDE_R_Tape & (TopRightTape || TopLeftTape))) {// Both Right Tape Triggered\
-                nextState = CORNER_TURN;
+            else if ((int)tapeRead == (SIDE_R_Tape & (TopRightTape || TopLeftTape))) {// Both Right Tape Triggered
+                nextState = FOLLOW_TAPE;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
                 //printf("Both Right Tape Sensors\r\n");
