@@ -13,8 +13,8 @@
 #include "serial.h" 
 
 /////* PRIVATE DEFINITIONS */////
-#define SPEEDRIGHT 55
-#define SPEEDLEFT 65
+#define SPEEDRIGHT 45
+#define SPEEDLEFT 55
 #define FORWARD 1
 #define BACKWARD -1
 #define ROBOT_MAXSPEED 100
@@ -152,7 +152,7 @@ void hardTurnLeft(void) {
 
 void pivotBackRight(void) {
     RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
-    RoboRightMtrSpeed(0);
+    RoboRightMtrSpeed(10);
 }
 
 void pivotBackLeft(void) {
@@ -177,9 +177,13 @@ void stop(void) {
 
 void slightRightDrive(void) {
     RoboLeftMtrSpeed(SPEEDLEFT);
-    RoboRightMtrSpeed(60);
+    RoboRightMtrSpeed(SPEEDRIGHT - 5);
 }
 
+void slightLeftDrive(void) {
+    RoboLeftMtrSpeed(SPEEDLEFT - 5);
+    RoboRightMtrSpeed(SPEEDRIGHT);
+}
 void roboSway(uint8_t bias){
     if (bias == 0){ //Left Sway
         RoboRightMtrSpeed(85);
@@ -192,5 +196,5 @@ void roboSway(uint8_t bias){
 }
 
 void beltDriveMax(void){
-    RoboBeltMtrSpeed(90 * FORWARD); //Backwards b/c the belt drive needs to roll  balls IN
+    RoboBeltMtrSpeed(60 * FORWARD); //Backwards b/c the belt drive needs to roll  balls IN
 }

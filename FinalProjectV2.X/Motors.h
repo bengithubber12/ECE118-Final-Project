@@ -31,6 +31,7 @@ void hardTurnLeft(void);
 void hardTurnRight(void);
 void stop(void);
 void slightRightDrive(void);
+void slightLeftDrive(void);
 void roboSway(uint8_t bias);
 void beltDriveMax(void);
 ////Turn Functions where robot stops in place
