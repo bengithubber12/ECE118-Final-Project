@@ -45,9 +45,7 @@ typedef enum {
     ES_TIMERSTOPPED, /* signals that a timer has stopped*/
     /* User-defined events start here */
     TAPE_STATUS_CHANGE,
-    TRACK_WIRE_FOUND,
-    TRACK_WIRE_NOT_DETECTED,
-    BIAS_CHANGE,
+    BACK_TAPE_STATUS_CHANGE,
     BUMPER_STATUS_CHANGE,
     BATTERY_CONNECTED,
     BATTERY_DISCONNECTED,
@@ -66,9 +64,7 @@ static const char *EventNames[] = {
 	"ES_TIMERACTIVE",
 	"ES_TIMERSTOPPED",
 	"TAPE_STATUS_CHANGE",
-	"TRACK_WIRE_FOUND",
-	"TRACK_WIRE_NOT_DETECTED",
-	"BIAS_CHANGE",
+	"BACK_TAPE_STATUS_CHANGE",
 	"BUMPER_STATUS_CHANGE",
 	"BATTERY_CONNECTED",
 	"BATTERY_DISCONNECTED",
@@ -96,11 +92,11 @@ static const char *EventNames[] = {
 #define TIMER2_RESP_FUNC PostRoboTopHSM
 #define TIMER3_RESP_FUNC PostBumperService
 #define TIMER4_RESP_FUNC PostRoboTopHSM
-#define TIMER5_RESP_FUNC PostTWService
+#define TIMER5_RESP_FUNC PostBackTapeService
 #define TIMER6_RESP_FUNC PostRoboTopHSM
 #define TIMER7_RESP_FUNC PostRoboTopHSM
 #define TIMER8_RESP_FUNC PostRoboTopHSM
-#define TIMER9_RESP_FUNC TIMER_UNUSED
+#define TIMER9_RESP_FUNC PostBackTapeService
 #define TIMER10_RESP_FUNC TIMER_UNUSED
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
@@ -121,7 +117,7 @@ static const char *EventNames[] = {
 #define ROAM_TIMER 4
 #define TRACK_WIRE_SERVICE_TIMER 5
 #define DEPOSIT_TIMER 6
-
+#define BACK_TAPE_SERVICE_TIMER 5
 #define GenericTimer 15
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of 
@@ -192,11 +188,11 @@ static const char *EventNames[] = {
 // These are the definitions for Service 4
 #if NUM_SERVICES > 4
 // the header file with the public fuction prototypes
-#define SERV_4_HEADER "TrackWireService.h"
+#define SERV_4_HEADER "BackTapeService.h"
 // the name of the Init function
-#define SERV_4_INIT InitTWService
+#define SERV_4_INIT InitBackTapeService
 // the name of the run function
-#define SERV_4_RUN RunTWService
+#define SERV_4_RUN RunBackTapeService
 // How big should this services Queue be?
 #define SERV_4_QUEUE_SIZE 3
 #endif
@@ -205,7 +201,7 @@ static const char *EventNames[] = {
 // These are the definitions for Service 5
 #if NUM_SERVICES > 5
 // the header file with the public fuction prototypes
-#define SERV_5_HEADER "TestService.h"
+#define SERV_5_HEADER 
 // the name of the Init function
 #define SERV_5_INIT TestServiceInit
 // the name of the run function
