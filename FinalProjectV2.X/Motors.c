@@ -13,8 +13,8 @@
 #include "serial.h" 
 
 /////* PRIVATE DEFINITIONS */////
-#define SPEEDRIGHT 45
-#define SPEEDLEFT 55
+#define SPEEDRIGHT 55
+#define SPEEDLEFT 65
 #define FORWARD 1
 #define BACKWARD -1
 #define ROBOT_MAXSPEED 100
@@ -141,18 +141,26 @@ void tankTurnLeft(void) {
 }
 
 void hardTurnRight(void) {
-    RoboLeftMtrSpeed(75 * SPEEDLEFT);
-    RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
+    RoboLeftMtrSpeed(SPEEDLEFT * FORWARD);
+    RoboRightMtrSpeed(BACKWARD * 45);
 }
 
 void hardTurnLeft(void) {
+    RoboLeftMtrSpeed(BACKWARD * 50);
+    RoboRightMtrSpeed(SPEEDRIGHT * FORWARD);
+}
+void hardBackLeft(void){
     RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
-    RoboRightMtrSpeed(75 * SPEEDRIGHT);
+    RoboRightMtrSpeed(50 * FORWARD);
+}
+void hardBackRight(void){
+    RoboLeftMtrSpeed(55 * FORWARD);
+    RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
 }
 
 void pivotBackRight(void) {
     RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
-    RoboRightMtrSpeed(10);
+    RoboRightMtrSpeed(0);
 }
 
 void pivotBackLeft(void) {
@@ -162,11 +170,11 @@ void pivotBackLeft(void) {
 
 void pivotForwardRight(void) {
     RoboLeftMtrSpeed(FORWARD * SPEEDLEFT);
-    RoboRightMtrSpeed(0);
+    RoboRightMtrSpeed(40);
 }
 
 void pivotForwardLeft(void) {
-    RoboLeftMtrSpeed(0);
+    RoboLeftMtrSpeed(45);
     RoboRightMtrSpeed(FORWARD * SPEEDRIGHT);
 }
 
@@ -186,12 +194,12 @@ void slightLeftDrive(void) {
 }
 void roboSway(uint8_t bias){
     if (bias == 0){ //Left Sway
-        RoboRightMtrSpeed(85);
-        RoboLeftMtrSpeed(70);
+        RoboRightMtrSpeed(SPEEDRIGHT - 15);
+        RoboLeftMtrSpeed(SPEEDLEFT);
     }
     else if (bias == 1){//Right Sway
-        RoboRightMtrSpeed(85);
-        RoboLeftMtrSpeed(75);
+        RoboRightMtrSpeed(SPEEDRIGHT);
+        RoboLeftMtrSpeed(SPEEDLEFT - 15);
     }
 }
 

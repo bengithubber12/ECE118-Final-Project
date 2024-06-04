@@ -29,6 +29,8 @@ void tankTurnLeft(void);
 void tankTurnRight(void);
 void hardTurnLeft(void);
 void hardTurnRight(void);
+void hardBackLeft(void);
+void hardBackRight(void);
 void stop(void);
 void slightRightDrive(void);
 void slightLeftDrive(void);
