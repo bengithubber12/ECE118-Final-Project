@@ -35,6 +35,8 @@
 #include "DepositSubHSM.h"
 #include "TapeService.h"
 #include "BumperService.h"
+#include "FindDoorSubHSM.h"
+#include "RC_Servo.h"
 #include <stdio.h>
 
 /*******************************************************************************
@@ -58,8 +60,9 @@ static const char *StateNames[] = {
 #define QUARTER_SECOND 250
 #define HALF_SECOND 500
 #define ONE_SECOND 1000
-#define TURN_TIMER 6
-#define BACK_UP_TIMER 6
+#define TURN_TIMER 9
+#define BACK_UP_TIMER 9
+#define DEPOSIT_TIME 10000
 
 //Bumper Definitions
 #define TOP_FLB 0x10
@@ -106,6 +109,7 @@ static uint8_t MyPriority;
  * @author J. Edward Carryer, 2011.10.23 19:25 */
 uint8_t InitDepositSubHSM(void) {
     ES_Event returnEvent;
+
 
     CurrentState = InitPSubState;
     returnEvent = RunDepositSubHSM(INIT_EVENT);
@@ -155,11 +159,11 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
             goBackward();
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(BACK_UP_TIMER, 750);
+                    ES_Timer_InitTimer(BACK_UP_TIMER, 400);
                     break;
 
                 case ES_EXIT:
-                    ES_Timer_SetTimer(BACK_UP_TIMER, 750);
+                    ES_Timer_SetTimer(BACK_UP_TIMER, 400);
                     break;
 
                 case ES_TIMEOUT:
@@ -169,21 +173,20 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
                     break;
-                    
+
                 default: // all unhandled events pass the event back up to the next level
                     break;
             }
             break;
-            
+
         case TURN_TO_WALL:
             tankTurnLeft();
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(TURN_TIMER, ONE_SECOND);
+                    ES_Timer_InitTimer(TURN_TIMER, 900);
                     break;
-
                 case ES_EXIT:
-                    ES_Timer_SetTimer(TURN_TIMER, ONE_SECOND);
+                    ES_Timer_SetTimer(TURN_TIMER, 900);
                     break;
 
                 case ES_TIMEOUT:
@@ -193,34 +196,42 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
                     break;
-                    
+
                 default: // all unhandled events pass the event back up to the next level
                     break;
             }
             break;
-            
+
         case BACK_TO_WALL:
-            goBackward();
             switch (ThisEvent.EventType) {
-                
                 case BUMPER_STATUS_CHANGE: //if back bumpers hit
                     switch (ThisEvent.EventParam) {
                         case BOT_BRB:
+                            RoboLeftMtrSpeed(-75);
+                            RoboRightMtrSpeed(0);
+                            ES_Timer_InitTimer(TURN_TIMER, 100);
                             //servo stuff
-                            stop();
+                            //stop();
                             break;
                         case BOT_BLB:
+                            RoboLeftMtrSpeed(0);
+                            RoboRightMtrSpeed(-80);
+                            ES_Timer_InitTimer(TURN_TIMER, 100);
                             //servo stuff
-                            stop();
                             break;
-                        case BOT_BackBumpers: 
+                        case BOT_BackBumpers:
                             //servo stuff
+                            printf("Triggering servo\r\n");
                             stop();
+                            RoboBeltMtrSpeed(0);
+                            RC_SetPulseTime(RC_PORTW08, 2400);
                             break;
+
                     }
                     break;
-                    
+
                 case ES_ENTRY:
+                    goBackward();
                     //ES_Timer_InitTimer(TURN_TIMER, ONE_SECOND);
                     break;
 
@@ -229,13 +240,13 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
                     break;
 
                 case ES_TIMEOUT:
-                    //if (ThisEvent.EventParam == TURN_TIMER) {
-                    //    nextState = BACK_TO_WALL;
-                    //    makeTransition = TRUE;
-                    //    ThisEvent.EventType = ES_NO_EVENT;
-                    //}
+                    if (ThisEvent.EventParam == TURN_TIMER) {
+                        stop();
+                        RoboBeltMtrSpeed(0);
+                        RC_SetPulseTime(RC_PORTW08, 2000);
+                    }
                     break;
-                    
+
                 default: // all unhandled events pass the event back up to the next level
                     break;
             }
