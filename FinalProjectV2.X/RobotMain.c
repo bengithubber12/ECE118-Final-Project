@@ -4,13 +4,13 @@
 #include <stdio.h>
 #include "ES_Configure.h"
 #include "ES_Framework.h"
+#include "RC_Servo.h"
 
-
-void main(void)
-{
+void main(void) {
     ES_Return_t ErrorType;
     BOARD_Init();
     ROBO_Init();
+    RC_Init();
     
     printf("Starting ES Framework Template\r\n");
     printf("using the 2nd Generation Events & Services Framework\r\n");
@@ -26,17 +26,18 @@ void main(void)
     }
     //if we got to here, there was an error
     switch (ErrorType) {
-    case FailedPointer:
-        printf("Failed on NULL pointer");
-        break;
-    case FailedInit:
-        printf("Failed Initialization");
-        break;
-    default:
-        printf("Other Failure: %d", ErrorType);
-        break;
+        case FailedPointer:
+            printf("Failed on NULL pointer");
+            break;
+        case FailedInit:
+            printf("Failed Initialization");
+            break;
+        default:
+            printf("Other Failure: %d", ErrorType);
+            break;
     }
-    while(1){}
+    while (1) {
+    }
 
 };
 
