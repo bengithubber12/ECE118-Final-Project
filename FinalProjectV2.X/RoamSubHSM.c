@@ -55,10 +55,11 @@ typedef enum {
 } RoamSubHSMState_t;
 
 static const char *StateNames[] = {
-    "InitPSubState",
-    "FREE_ROAM",
-    "TAPE_HANDLER",
-    "BUMPER_HANDLER",
+	"InitPSubState",
+	"FREE_ROAM",
+	"BACKUP",
+	"TURN",
+	"BUMPER_HANDLER",
 };
 
 typedef enum {
@@ -69,6 +70,8 @@ typedef enum {
     PIVOTFRIGHT,
     TANKTURNLEFT,
     TANKTURNRIGHT,
+    LEFTDRIVE,
+    RIGHTDRIVE,
 } MotorFunc;
 
 //Timer Definitions
@@ -153,12 +156,11 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
     RoamSubHSMState_t nextState;
     uint8_t curMotorBias = 1;
     ES_Tattle(); // trace call stack
-    unsigned char bumperRead;
-    unsigned char tapeRead;
     switch (CurrentState) {
         case InitPSubState: // If current state is initial Psedudo State
             if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
             {
+                beltDriveMax();
                 nextState = FREE_ROAM;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
@@ -167,37 +169,66 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
 
         case FREE_ROAM: // in the first state, replace this with correct names
             // right 
-            beltDriveMax();
+
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
                     roboSway(curMotorBias);
                     break;
 
                 case TAPE_STATUS_CHANGE: //if a change in tape is detected
+                    makeTransition = TRUE;
+                    ThisEvent.EventParam = ES_NO_EVENT;
                     if (PORTZ06_BIT || PORTZ08_BIT) {// ONLY Left Tape Sensor Triggered
                         nextMotorState = TANKTURNRIGHT;
-                        //printf("Front Left Tape Sensor\r\n");
+                        nextState = BACKUP;
                     } else if (PORTZ07_BIT || PORTZ05_BIT) {// ONLY TOP Right Tape Sensor Triggered
                         nextMotorState = TANKTURNLEFT;
-                    } else if (((int) prevTapeRead == BothTopTape) && !TURNING) { //Either All front tape sensors are triggered or just front tape sensors
-                        nextMotorState = NOTURN;
+                        nextState = BACKUP;
+                    } else if (!PORTZ06_BIT && !PORTZ08_BIT && !PORTZ05_BIT && !PORTZ07_BIT) {
+                        nextMotorState = FREE_ROAM;
+                        nextState = TURN;
+                        ES_Timer_StopTimer(TURN_TIMER);
+                    } else {
+                        makeTransition = FALSE;
                     }
                     break;
 
                 case BACK_TAPE_STATUS_CHANGE: //if a change in tape is detected
-                    if (PORTZ11_BIT) {//TAPE BACK LEFT TRIGGERED
-                        nextMotorState = PIVOTFLEFT;
-                        //TURNING = 1;
-                    } else if (PORTZ09_BIT) { //TAPE BACK RIGHT TRIGGERED
+                    makeTransition = TRUE;
+                    ThisEvent.EventParam = ES_NO_EVENT;
+                    if (PORTZ09_BIT) { //TAPE BACK RIGHT TRIGGERED
                         nextMotorState = PIVOTFRIGHT;
-                        //TURNING = 1;
+                        nextState = TURN;
+                    } else if (PORTZ11_BIT) { //TAPE BACK LEFT TRIGGERED
+                        nextMotorState = PIVOTFLEFT;
+                        nextState = TURN;
+                    } else if (!PORTZ06_BIT && !PORTZ08_BIT && !PORTZ05_BIT && !PORTZ07_BIT) {
+                        nextMotorState = FREE_ROAM;
+                        nextState = TURN;
+                        ES_Timer_StopTimer(TURN_TIMER);
+                    } else {
+                        makeTransition = FALSE;
                     }
                     break;
 
                 case BUMPER_STATUS_CHANGE:
-                    nextState = BUMPER_HANDLER;
                     makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
+                    ThisEvent.EventParam = ES_NO_EVENT;
+                    if (!PORTX10_BIT) {// BOTTOM Front Left Bumper
+                        nextMotorState = PIVOTBLEFT;
+                        nextState = BACKUP;
+                    } else if (!PORTX03_BIT) {//  BOTTOM Front Right Bumper
+                        nextMotorState = PIVOTBRIGHT;
+                        nextState = BACKUP;
+                    } else if (!PORTX04_BIT) {// Back Right Bumper
+                        nextMotorState = LEFTDRIVE;
+                        nextState = TURN;
+                    } else if (!PORTX11_BIT) {// Back Left Bumper
+                        nextMotorState = RIGHTDRIVE;
+                        nextState = TURN;
+                    } else {
+                        makeTransition = FALSE;
+                    }
                     break;
 
                 default: // all unhandled events pass the event back up to the next level
@@ -213,114 +244,121 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                     goBackward();
                     break;
                 case BACK_TAPE_STATUS_CHANGE: //if a change in tape is detected
+                    ThisEvent.EventType = ES_NO_EVENT;
+                    makeTransition = TRUE;
                     if (PORTZ11_BIT) {//TAPE BACK LEFT TRIGGERED
                         nextMotorState = PIVOTFLEFT;
                         nextState = TURN;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
                         ES_Timer_StopTimer(TURN_TIMER);
                     } else if (PORTZ09_BIT) { //TAPE BACK RIGHT TRIGGERED
                         nextMotorState = PIVOTFRIGHT;
                         nextState = TURN;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
                         ES_Timer_StopTimer(TURN_TIMER);
+                    } else {
+                        makeTransition = FALSE;
+                    }
+                    break;
+
+                case BUMPER_STATUS_CHANGE:
+                    makeTransition = TRUE;
+                    ThisEvent.EventParam = ES_NO_EVENT;
+                    if (!PORTX04_BIT) {// Back Right Bumper
+                        nextMotorState = LEFTDRIVE;
+                        nextState = TURN;
+                        ES_Timer_StopTimer(TURN_TIMER);
+                    } else if (!PORTX11_BIT) {// Back Left Bumper
+                        nextMotorState = RIGHTDRIVE;
+                        nextState = TURN;
+                        ES_Timer_StopTimer(TURN_TIMER);
+                    } else {
+                        makeTransition = FALSE;
                     }
                     break;
                 case ES_TIMEOUT:
-                    if (ThisEvent.EventParam == TURN_TIMER){
+                    if (ThisEvent.EventParam == TURN_TIMER) {
                         nextState = TURN;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
-
+                    break;
                 default: // all unhandled events pass the event back up to the next level
                     break;
             }
             break;
-        case BUMPER_HANDLER: // Handles bumper detection
-            bumperRead = ~((PORTX08_BIT << 7) | ((PORTX06_BIT << 6) | ((PORTX05_BIT << 5) | (PORTX12_BIT << 4) | (PORTX11_BIT << 3) | ((PORTX04_BIT << 2) | ((PORTX03_BIT << 1) | PORTX10_BIT)))));
-            //Determine which bumper is triggered
-            if ((int) bumperRead == BOT_FLB) {// BOTTOM Front Left Bumper
-                pivotBackLeft();
 
-                //printf("Front Left Bumper\r\n");
-            } else if ((int) bumperRead == BOT_FRB && !BUMPER_TURNING) {//  BOTTOM Front Right Bumper
-                pivotBackRight();
-
-                //printf("Front Right Bumper\r\n");
-            } else if (((int) bumperRead == BOT_FrontBumpers) && !BUMPER_TURNING) {//BOTTOM Both Front Bumpers
-                pivotBackRight();
-
-                //printf("Both Front Bumpers\r\n");
-            } else if ((int) bumperRead == BOT_BRB) {// Back Right Bumper
-                slightLeftDrive();
-
-                //printf("Back Right Bumper\r\n");
-            } else if ((int) bumperRead == BOT_BLB) {// Back Left Bumper
-                slightRightDrive();
-
-                //printf("Back Left Bumper\r\n");
-            } else if ((int) bumperRead == BOT_BackBumpers) {// Both Back Bumpers
-                run();
-
-                //printf("Both Back Bumpers\r\n");
-            }
-
+        case TURN:
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(BUMPER_TIMER, 600);
-
+                    
+                    switch (nextMotorState) {
+                        case NOTURN:
+                            nextState = FREE_ROAM;
+                            ThisEvent.EventType = ES_NO_EVENT;
+                            makeTransition = TRUE;
+                            break;
+                        case PIVOTBLEFT:
+                            pivotBackLeft();
+                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            break;
+                        case PIVOTBRIGHT:
+                            pivotBackRight();
+                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            break;
+                        case PIVOTFLEFT:
+                            pivotForwardLeft();
+                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            break;
+                        case PIVOTFRIGHT:
+                            pivotForwardRight();
+                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            break;
+                        case TANKTURNLEFT:
+                            tankTurnLeft();
+                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            break;
+                        case TANKTURNRIGHT:
+                            tankTurnRight();
+                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            break;
+                        case LEFTDRIVE:
+                            slightLeftDrive();
+                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            break;
+                        case RIGHTDRIVE:
+                            slightRightDrive();
+                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            break;
+                        default:
+                            break;
+                    }
                     break;
 
-                case ES_EXIT:
-                    ES_Timer_SetTimer(BUMPER_TIMER, 600);
-
+                case BACK_TAPE_STATUS_CHANGE: //if a change in tape is detected
+                    ThisEvent.EventType = ES_NO_EVENT;
+                    makeTransition = TRUE;
+                    if (PORTZ11_BIT) {//TAPE BACK LEFT TRIGGERED
+                        nextMotorState = PIVOTFLEFT;
+                        nextState = TURN;
+                        ES_Timer_StopTimer(TURN_TIMER);
+                    } else if (PORTZ09_BIT) { //TAPE BACK RIGHT TRIGGERED
+                        nextMotorState = PIVOTFRIGHT;
+                        nextState = TURN;
+                        ES_Timer_StopTimer(TURN_TIMER);
+                    } else {
+                        makeTransition = FALSE;
+                    }
                     break;
-
                 case ES_TIMEOUT:
-                    if (ThisEvent.EventParam == BUMPER_TIMER) {
+                    if (ThisEvent.EventParam == TURN_TIMER) {
                         nextState = FREE_ROAM;
-                        if (BUMPER_BACKUP == 1) {
-                            BUMPER_TURNING = 0;
-                            BUMPER_BACKUP = 2;
-                        } else if (BUMPER_TURNING == 1) {
-                            BUMPER_BACKUP = 0;
-                            BUMPER_TURNING = 0;
-                            curMotorBias ^= 1;
-                        }
-                        if (bumperRead > 0) {
-                            nextState = BUMPER_HANDLER;
-                        }
-                        //printf("Bumper timer done\r\n");
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
                     break;
-
-                case TAPE_STATUS_CHANGE:
-                    nextState = TAPE_HANDLER;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                    BUMPER_BACKUP = 0;
-                    BUMPER_TURNING = 0;
-                    //ES_Timer_StopTimer(BUMPER_TIMER);
-                    break;
-
-                case BACK_TAPE_STATUS_CHANGE:
-                    nextState = TAPE_HANDLER;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                    BUMPER_BACKUP = 0;
-                    BUMPER_TURNING = 0;
-                    //ES_Timer_StopTimer(BUMPER_TIMER);
-                    break;
-
                 default: // all unhandled events pass the event back up to the next level
                     break;
             }
             break;
-
         default: // all unhandled states fall into here
             break;
     } // end switch on Current State
