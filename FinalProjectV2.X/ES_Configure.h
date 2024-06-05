@@ -34,7 +34,8 @@
 
 /****************************************************************************/
 typedef enum {
-    ES_NO_EVENT, ES_ERROR, /* used to indicate an error from the service */
+    ES_NO_EVENT,
+    ES_ERROR, /* used to indicate an error from the service */
     ES_INIT, /* used to transition from initial pseudo-state */
     ES_ENTRY, /* used to enter a state*/
     ES_EXIT, /* used to exit a state*/
@@ -49,6 +50,7 @@ typedef enum {
     BUMPER_STATUS_CHANGE,
     BATTERY_CONNECTED,
     BATTERY_DISCONNECTED,
+    DOOR_FOUND,
     NUMBEROFEVENTS,
 } ES_EventTyp_t;
 
@@ -68,6 +70,7 @@ static const char *EventNames[] = {
 	"BUMPER_STATUS_CHANGE",
 	"BATTERY_CONNECTED",
 	"BATTERY_DISCONNECTED",
+	"DOOR_FOUND",
 	"NUMBEROFEVENTS",
 };
 
@@ -96,11 +99,11 @@ static const char *EventNames[] = {
 #define TIMER6_RESP_FUNC PostRoboTopHSM
 #define TIMER7_RESP_FUNC PostRoboTopHSM
 #define TIMER8_RESP_FUNC PostRoboTopHSM
-#define TIMER9_RESP_FUNC PostBackTapeService
-#define TIMER10_RESP_FUNC TIMER_UNUSED
-#define TIMER11_RESP_FUNC TIMER_UNUSED
-#define TIMER12_RESP_FUNC TIMER_UNUSED
-#define TIMER13_RESP_FUNC TIMER_UNUSED
+#define TIMER9_RESP_FUNC PostRoboTopHSM
+#define TIMER10_RESP_FUNC PostRoboTopHSM
+#define TIMER11_RESP_FUNC PostRoboTopHSM
+#define TIMER12_RESP_FUNC PostRoboTopHSM
+#define TIMER13_RESP_FUNC PostRoboTopHSM
 #define TIMER14_RESP_FUNC TIMER_UNUSED
 #define TIMER15_RESP_FUNC PostRoboTopHSM
 
@@ -115,9 +118,8 @@ static const char *EventNames[] = {
 #define TAPE_SERVICE_TIMER 1
 #define BUMPER_SERVICE_TIMER 3
 #define ROAM_TIMER 4
-#define TRACK_WIRE_SERVICE_TIMER 5
-#define DEPOSIT_TIMER 6
 #define BACK_TAPE_SERVICE_TIMER 5
+#define DEPOSIT_TIMER 6
 #define GenericTimer 15
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of 
