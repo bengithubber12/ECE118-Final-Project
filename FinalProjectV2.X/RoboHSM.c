@@ -35,14 +35,15 @@
 #include "Motors.h"
 #include "RoboHSM.h"
 #include "RoamSubHSM.h"
-//#include "DepositSubHSM.h"
+#include "DepositSubHSM.h"
 #include "MowerSubHSM.h"
 #include "FindDoorSubHSM.h"
+#include "RC_Servo.h"
 //#include all sub state machines called
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
  ******************************************************************************/
-
+#define ROAM_TIME 25000
 /*******************************************************************************
  * MODULE #DEFINES                                                             *
  ******************************************************************************/
@@ -51,6 +52,7 @@ typedef enum {
     ROAMING,
     FIND_DOOR,
     MOWING,
+    DEPOSIT,
 } RoboTopHSMState_t;
 
 static const char *StateNames[] = {
@@ -58,6 +60,7 @@ static const char *StateNames[] = {
 	"ROAMING",
 	"FIND_DOOR",
 	"MOWING",
+	"DEPOSIT",
 };
 
 
@@ -112,8 +115,10 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                 //InitRoamSubHSM();
                 //InitDepositSubHSM();
                 //InitFindDoorSubHSM();
-                //InitBeaconSubHSM();
-                
+                //InitMowerSubHSM();
+
+                RC_AddPins(RC_PORTW08);
+                RC_SetPulseTime(RC_PORTW08, 900);
                 // now put the machine into the actual initial state
                 nextState = ROAMING;
                 makeTransition = TRUE;
@@ -127,9 +132,10 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
                     InitRoamSubHSM();
+                    ES_Timer_InitTimer(ROAM_TIMER, ROAM_TIME);
                     break;
                 case ES_TIMEOUT:
-                    if (ThisEvent.EventParam == ROAM_TIMER){
+                    if (ThisEvent.EventParam == ROAM_TIMER) {
                         //curMotorBias ^= 1;
                         //roboSway(curMotorBias); 
                         //printf("Tape timer done\r\n");
@@ -143,14 +149,20 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                 default:
                     break;
             }
-            
+
             break;
 
         case FIND_DOOR:
+
             ThisEvent = RunFindDoorSubHSM(ThisEvent);
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
                     InitFindDoorSubHSM();
+                    break;
+                case DOOR_FOUND:
+                    nextState = DEPOSIT;
+                    makeTransition = TRUE;
+                    ThisEvent.EventType = ES_NO_EVENT;
                     break;
                     /*
                 case ES_NO_EVENT:
@@ -159,22 +171,53 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                     break;
             }
             break;
-//         case MOWING:
-//            ThisEvent = RunMowerSubHSM(ThisEvent);
-//            switch (ThisEvent.EventType) {
-//                case ES_ENTRY:
-//                    InitMowerSubHSM();
-//                    break;
-//                case ES_NO_EVENT:
-//                    break;
-//                default:
-//                    break;
-            //}
+
+        case DEPOSIT:
+            RoboBeltMtrSpeed(0);
+            ThisEvent = RunDepositSubHSM(ThisEvent);
+            switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    ES_Timer_InitTimer(DEPOSIT_TIMER, 10000);
+                    InitDepositSubHSM();
+                    break;
+                case ES_TIMEOUT:
+                    if (ThisEvent.EventParam == DEPOSIT_TIMER) {
+                        RC_SetPulseTime(RC_PORTW08, 900);
+                        pivotForwardRight();
+                        nextState = ROAMING;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+            break;
+
+        case MOWING:
+            ThisEvent = RunMowerSubHSM(ThisEvent);
+            switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    ES_Timer_InitTimer(MOWER_TIMER, 60000);
+                    InitMowerSubHSM();
+                    break;
+                case ES_TIMEOUT:
+                    if (ThisEvent.EventParam == MOWER_TIMER) {
+                        nextState = ROAMING;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            break;
         default: // all unhandled states fall into here
             break;
-            
-       
-           
+
+
+
     } // end switch on Current State
 
     if (makeTransition == TRUE) { // making a state transition, send EXIT and ENTRY
