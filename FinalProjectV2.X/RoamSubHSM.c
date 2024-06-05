@@ -49,17 +49,27 @@
 typedef enum {
     InitPSubState,
     FREE_ROAM,
-    TAPE_HANDLER,
+    BACKUP,
+    TURN,
     BUMPER_HANDLER,
 } RoamSubHSMState_t;
 
 static const char *StateNames[] = {
-	"InitPSubState",
-	"FREE_ROAM",
-	"TAPE_HANDLER",
-	"BUMPER_HANDLER",
+    "InitPSubState",
+    "FREE_ROAM",
+    "TAPE_HANDLER",
+    "BUMPER_HANDLER",
 };
 
+typedef enum {
+    NOTURN,
+    PIVOTBLEFT,
+    PIVOTBRIGHT,
+    PIVOTFLEFT,
+    PIVOTFRIGHT,
+    TANKTURNLEFT,
+    TANKTURNRIGHT,
+} MotorFunc;
 
 //Timer Definitions
 #define QUARTER_SECOND 250
@@ -80,13 +90,10 @@ static const char *StateNames[] = {
 #define TR_R_Tape 0xC 
 #define TR_R_TL_Tape 0xE
 #define AllTopSensors 0xF
-#define BackRightTape 0x10
-#define BothRightTape 0x18
-#define AllRight 0x1C
-#define BackLeftTape 0x20
-#define BothLeftTape 0x21
-#define AllLeft 0x23
-#define BothBackTape 0x30
+
+#define BackRightTape 0x01
+#define BackLeftTape 0x02
+#define BothBackTape 0x03
 
 //Bumper Definitions
 #define TOP_FLB 0x10
@@ -120,14 +127,8 @@ static RoamSubHSMState_t CurrentState = InitPSubState; // <- change name to matc
 static uint8_t MyPriority;
 static uint8_t lastEvent = 0;
 // Motor bias represents left(0) and right(1) sway for the bot
-static uint8_t TURNING = 0;
-static uint8_t BACKUP = 0;
-static uint8_t BUMPER_BACKUP = 0;
-static uint8_t BUMPER_TURNING = 0;
 static uint8_t prevTapeRead = 0;
-static uint8_t prevbumperRead = 0;
-
-
+static MotorFunc nextMotorState = NOTURN;
 /*******************************************************************************
  * PUBLIC FUNCTIONS                                                            *
  ******************************************************************************/
@@ -136,10 +137,8 @@ static uint8_t prevbumperRead = 0;
  * @author J. Edward Carryer, 2011.10.23 19:25 */
 uint8_t InitRoamSubHSM(void) {
     ES_Event returnEvent;
-
     CurrentState = InitPSubState;
     returnEvent = RunRoamSubHSM(INIT_EVENT);
-
     if (returnEvent.EventType == ES_NO_EVENT) {
         return TRUE;
     }
@@ -160,16 +159,9 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
         case InitPSubState: // If current state is initial Psedudo State
             if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
             {
-                //printf("Currently initializing free roam\r\n");
-                // now put the machine into the actual initial state
-                //curMotorBias = 1; //Set the initial motor BIAS to right(1)
-
-                //roboSway(curMotorBias);
-                //run();
                 nextState = FREE_ROAM;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
-
             }
             break;
 
@@ -182,27 +174,30 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                     break;
 
                 case TAPE_STATUS_CHANGE: //if a change in tape is detected
-                    nextState = TAPE_HANDLER;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                    TURNING = 0;
-                    BACKUP = 0;
+                    if (PORTZ06_BIT || PORTZ08_BIT) {// ONLY Left Tape Sensor Triggered
+                        nextMotorState = TANKTURNRIGHT;
+                        //printf("Front Left Tape Sensor\r\n");
+                    } else if (PORTZ07_BIT || PORTZ05_BIT) {// ONLY TOP Right Tape Sensor Triggered
+                        nextMotorState = TANKTURNLEFT;
+                    } else if (((int) prevTapeRead == BothTopTape) && !TURNING) { //Either All front tape sensors are triggered or just front tape sensors
+                        nextMotorState = NOTURN;
+                    }
                     break;
 
                 case BACK_TAPE_STATUS_CHANGE: //if a change in tape is detected
-                    nextState = TAPE_HANDLER;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                    TURNING = 0;
-                    BACKUP = 0;
+                    if (PORTZ11_BIT) {//TAPE BACK LEFT TRIGGERED
+                        nextMotorState = PIVOTFLEFT;
+                        //TURNING = 1;
+                    } else if (PORTZ09_BIT) { //TAPE BACK RIGHT TRIGGERED
+                        nextMotorState = PIVOTFRIGHT;
+                        //TURNING = 1;
+                    }
                     break;
 
                 case BUMPER_STATUS_CHANGE:
                     nextState = BUMPER_HANDLER;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
-                    BUMPER_BACKUP = 0;
-                    BUMPER_TURNING = 0;
                     break;
 
                 default: // all unhandled events pass the event back up to the next level
@@ -211,89 +206,38 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
 
             break;
 
-        case TAPE_HANDLER: // Handles tape detection
-           tapeRead = ((PORTZ11_BIT << 5) | ((PORTZ09_BIT << 4) | ((PORTZ07_BIT << 3) | ((PORTZ05_BIT << 2) | ((PORTZ08_BIT << 1) | ((PORTZ06_BIT)))))));
-            //Determine which tape sensor is triggered
-            //printf("Current Backup status: %d\r\n", BACKUP);
-            //printf("Current Turn Status: %d\r\n", TURNING);
-            //printf("PREVIOUS TAPE READING: %d\r\n", prevTapeRead);
-            if ((int) prevTapeRead == LeftTape && !TURNING) {// ONLY Left Tape Sensor Triggered
-                tankTurnRight();
-                TURNING = 1;
-                //printf("Front Left Tape Sensor\r\n");
-            } else if (((int) prevTapeRead == TopLeftTape || (int) prevTapeRead == BothLeftTape) && !TURNING) {// Front TOP Left or (Top Left and Left) Triggered
-                tankTurnRight();
-                TURNING = 1;
-                //printf("Top Left Tape Sensor\r\n");
-            } else if (((int) prevTapeRead == TopRightTape) && !TURNING){// ONLY TOP Right Tape Sensor Triggered
-                tankTurnLeft();
-                TURNING = 1;
-                //printf("Front Right Tape Sensor\r\n");
-            } else if (((int) prevTapeRead == RightTape || (int) prevTapeRead == BothRightTape) && !TURNING) {// Front TOP Right or (Top Right and Front Right) Triggered
-                tankTurnLeft();
-                TURNING = 1;
-                //printf("Top Right Tape Sensor\r\n");
-            } else if (((int) prevTapeRead == BothTopTape) && !TURNING) { //Either All front tape sensors are triggered or just front tape sensors
-                goBackward();
-                TURNING = 1;
-            } else if ((int) prevTapeRead == BackLeftTape || (int) prevTapeRead == BothBackTape){
-                pivotForwardLeft();
-                TURNING = 1;
-            } else if ((int) prevTapeRead == BackRightTape){
-                pivotForwardRight();
-                TURNING = 1;
-            }
-            else if (!BACKUP && (int) tapeRead > 0) {
-                printf("made it!\r\n");
-                goBackward();
-                BACKUP = 1;
-                prevTapeRead = tapeRead;
-            } else if ((int) prevTapeRead > 0) {
-                TURNING = 1;
-            }
+        case BACKUP:
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(TURN_TIMER, HALF_SECOND);
+                    ES_Timer_InitTimer(TURN_TIMER, 400);
+                    goBackward();
                     break;
-
-                case ES_EXIT:
-                    ES_Timer_SetTimer(TURN_TIMER, HALF_SECOND);
+                case BACK_TAPE_STATUS_CHANGE: //if a change in tape is detected
+                    if (PORTZ11_BIT) {//TAPE BACK LEFT TRIGGERED
+                        nextMotorState = PIVOTFLEFT;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        ES_Timer_StopTimer(TURN_TIMER);
+                    } else if (PORTZ09_BIT) { //TAPE BACK RIGHT TRIGGERED
+                        nextMotorState = PIVOTFRIGHT;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        ES_Timer_StopTimer(TURN_TIMER);
+                    }
                     break;
-
                 case ES_TIMEOUT:
-                    if (ThisEvent.EventParam == TURN_TIMER) {
-                        nextState = FREE_ROAM;
-                        if (BACKUP == 1) {
-                            TURNING = 0;
-                            BACKUP = 2;
-                        } else if (TURNING == 1) {
-                            BACKUP = 0;
-                            TURNING = 0;
-                            curMotorBias ^= 1;
-                        }
-                        if (tapeRead > 0){
-                            nextState = TAPE_HANDLER;
-                        }
-                        //curMotorBias ^= 1;
+                    if (ThisEvent.EventParam == TURN_TIMER){
+                        nextState = TURN;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
-                    break;
-              
-                case BUMPER_STATUS_CHANGE:
-                    nextState = BUMPER_HANDLER;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                    TURNING = 0;
-                    BACKUP = 0;
-                    //ES_Timer_StopTimer(TURN_TIMER);
-                    break;
 
                 default: // all unhandled events pass the event back up to the next level
                     break;
             }
             break;
-
         case BUMPER_HANDLER: // Handles bumper detection
             bumperRead = ~((PORTX08_BIT << 7) | ((PORTX06_BIT << 6) | ((PORTX05_BIT << 5) | (PORTX12_BIT << 4) | (PORTX11_BIT << 3) | ((PORTX04_BIT << 2) | ((PORTX03_BIT << 1) | PORTX10_BIT)))));
             //Determine which bumper is triggered
@@ -344,8 +288,8 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                             BUMPER_BACKUP = 0;
                             BUMPER_TURNING = 0;
                             curMotorBias ^= 1;
-                        } 
-                        if (bumperRead > 0){
+                        }
+                        if (bumperRead > 0) {
                             nextState = BUMPER_HANDLER;
                         }
                         //printf("Bumper timer done\r\n");
