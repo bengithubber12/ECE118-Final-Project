@@ -29,7 +29,7 @@
 #include "Motors.h"
 #include "IO_Ports.h"
 
-#define TIMER_5_TICKS 5
+#define TIMER_5_TICKS 25
 
 static uint8_t MyPriority;
 
@@ -66,6 +66,7 @@ ES_Event RunBackTapeService(ES_Event ThisEvent) {
             break;
         case ES_TIMERACTIVE:
             //printf("Timer\r\n");
+            break;
         case ES_TIMERSTOPPED:
             break;
         case ES_TIMEOUT:
@@ -76,7 +77,6 @@ ES_Event RunBackTapeService(ES_Event ThisEvent) {
             if (lastEvent != curEvent) {
                 ReturnEvent.EventType = BACK_TAPE_STATUS_CHANGE;
                 ReturnEvent.EventParam = curEvent;
-
                 lastEvent = curEvent;
                 PostRoboTopHSM(ReturnEvent);
                 //PostTapeService(ReturnEvent);
