@@ -6,9 +6,10 @@ build/default/production/DepositSubHSM.o: DepositSubHSM.c ES_Configure.h \
  C:/ECE118/include/ES_PostList.h C:/ECE118/include/ES_PriorTables.h \
  C:/ECE118/include/ES_Queue.h C:/ECE118/include/ES_ServiceHeaders.h \
  ES_Configure.h TapeService.h ES_Configure.h RoboHSM.h BumperService.h \
- TrackWireService.h C:/ECE118/include/ES_TattleTale.h \
+ BackTapeService.h C:/ECE118/include/ES_TattleTale.h \
  C:/ECE118/include/BOARD.h Motors.h RoboHSM.h DepositSubHSM.h \
- TapeService.h BumperService.h
+ TapeService.h BumperService.h FindDoorSubHSM.h \
+ C:/ECE118/include/RC_Servo.h
 
 ES_Configure.h:
 
@@ -46,7 +47,7 @@ RoboHSM.h:
 
 BumperService.h:
 
-TrackWireService.h:
+BackTapeService.h:
 
 C:/ECE118/include/ES_TattleTale.h:
 
@@ -61,3 +62,7 @@ DepositSubHSM.h:
 TapeService.h:
 
 BumperService.h:
+
+FindDoorSubHSM.h:
+
+C:/ECE118/include/RC_Servo.h:

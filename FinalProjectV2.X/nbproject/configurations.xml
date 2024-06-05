@@ -35,6 +35,7 @@
       <itemPath>RoboHSM.h</itemPath>
       <itemPath>TapeService.h</itemPath>
       <itemPath>TrackWireService.h</itemPath>
+      <itemPath>C:/ECE118-Final-Project/FinalProjectV2.X/BackTapeService.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -69,6 +70,7 @@
       <itemPath>Motors.c</itemPath>
       <itemPath>FindDoorSubHSM.c</itemPath>
       <itemPath>C:/ECE118/src/timers.c</itemPath>
+      <itemPath>C:/ECE118-Final-Project/FinalProjectV2.X/BackTapeService.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -131,7 +133,8 @@
         <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
-        <property key="extra-include-directories" value="C:\ECE118\include;."/>
+        <property key="extra-include-directories"
+                  value="C:\ECE118\include;.;C:\ECE118-Final-Project\FinalProjectV2.X"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="false"/>
