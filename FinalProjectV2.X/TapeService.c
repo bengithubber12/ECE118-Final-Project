@@ -28,7 +28,7 @@
 #include "Motors.h"
 #include "IO_Ports.h"
 
-#define TIMER_1_TICKS 5
+#define TIMER_1_TICKS 25
 
 static uint8_t MyPriority;
 
@@ -44,8 +44,8 @@ uint8_t InitTapeService(uint8_t Priority) {
     PORTZ08_TRIS = 1;  //TapeTopLeft
     PORTZ05_TRIS = 1;  //TapeTopRight 
     PORTZ07_TRIS = 1;  //TapeRight
-    PORTZ09_TRIS = 1;  //TapeBackRight
-    PORTZ11_TRIS = 1;  //TapeBackLeft
+   // PORTZ09_TRIS = 1;  //TapeBackRight
+    //PORTZ11_TRIS = 1;  //TapeBackLeft
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -69,61 +69,13 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
             break;
         case ES_TIMERACTIVE:
             //printf("Timer\r\n");
+            break;
         case ES_TIMERSTOPPED:
             break;
         case ES_TIMEOUT:
             ES_Timer_InitTimer(TAPE_SERVICE_TIMER, TIMER_1_TICKS); // runs every 5ms
-            curEvent = ((PORTZ11_BIT << 5) | ((PORTZ09_BIT << 4) | ((PORTZ07_BIT << 3) | ((PORTZ05_BIT << 2) | ((PORTZ08_BIT << 1) | ((PORTZ06_BIT)))))));
-               /*
-            // check for Left Tape
-            if (TapeLeft) {
-                //printf("Left reading: %d\r\n", TapeLeft);
-                curEvent |= (1 << 0);
-            } else {
-                //printf("Left reading: %d\r\n", TapeLeft);
-                curEvent &= ~(1 << 0);
-            }
-
-            // check for Front Left Tape
-            if (TapeTopLeft) {
-                //printf("Top Left reading: %d\r\n", TapeTopLeft);
-                curEvent |= (1 << 1);
-            } else {
-                //printf("Top Left reading: %d\r\n", TapeTopLeft);
-                curEvent &= ~(1 << 1);
-            }
-
-            // check for Front Right Tape
-            if (TapeTopRight) {
-                //printf("Top Right reading: %d\r\n", TapeTopRight);
-                curEvent |= (1 << 2);
-            } else {
-                //printf("Top Right reading: %d\r\n", TapeTopRight);
-                curEvent &= ~(1 << 2);
-            }
-
-            // check for Right Tape
-            if (TapeRight) {
-                //printf("Right reading: %d\r\n", TapeRight);
-                curEvent |= (1 << 3);
-            } else {
-                //printf("Right reading: %d\r\n", TapeRight);
-                curEvent &= ~(1 << 3);
-            }
-
-            if (TapeBackRight) {
-                curEvent |= (1 << 4);
-            } else {
-                curEvent &= ~(1 << 4);
-            }
-
-            //check for Back Left Tape
-            if (TapeBackLeft) {
-                curEvent |= (1 << 5);
-            } else {
-                curEvent &= ~(1 << 5);
-            }
-            */
+            curEvent = ((PORTZ07_BIT << 3) | ((PORTZ05_BIT << 2) | ((PORTZ08_BIT << 1) | ((PORTZ06_BIT)))));
+            
             // compare previous and current values
             if (lastEvent != curEvent) {
                 ReturnEvent.EventType = TAPE_STATUS_CHANGE;
