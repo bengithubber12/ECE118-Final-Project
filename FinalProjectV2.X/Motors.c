@@ -121,8 +121,8 @@ int RoboBeltMtrSpeed(int beltSpeed){
 }
 
 void run(void) {
-    RoboLeftMtrSpeed(FORWARD * SPEEDLEFT);
-    RoboRightMtrSpeed(FORWARD * SPEEDRIGHT);
+    RoboLeftMtrSpeed(FORWARD * 70);
+    RoboRightMtrSpeed(FORWARD * 60);
 }
 
 void goBackward(void) {

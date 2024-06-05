@@ -116,11 +116,11 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                 //InitDepositSubHSM();
                 //InitFindDoorSubHSM();
                 //InitMowerSubHSM();
-
+                beltDriveMax();
                 RC_AddPins(RC_PORTW08);
                 RC_SetPulseTime(RC_PORTW08, 900);
                 // now put the machine into the actual initial state
-                nextState = ROAMING;
+                nextState = MOWING;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
             }

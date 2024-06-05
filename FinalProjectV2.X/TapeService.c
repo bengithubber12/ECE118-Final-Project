@@ -28,7 +28,7 @@
 #include "Motors.h"
 #include "IO_Ports.h"
 
-#define TIMER_1_TICKS 25
+#define TIMER_1_TICKS 5
 
 static uint8_t MyPriority;
 
