@@ -58,7 +58,7 @@ ES_Event RunTWService(ES_Event ThisEvent) {
     switch(ThisEvent.EventType){
         case ES_INIT:
             break;
-
+               /*
         case ES_TIMEOUT:
             //Reset timer
             ES_Timer_InitTimer(TRACK_WIRE_SERVICE_TIMER, TW_TICKS);
@@ -80,7 +80,7 @@ ES_Event RunTWService(ES_Event ThisEvent) {
                 //PostTapeService(ReturnEvent);
             }
             break;
-            
+            */
         default:
             printf("\r\nEvent: %s\tParam: 0x%X",
             EventNames[ThisEvent.EventType], ThisEvent.EventParam);
