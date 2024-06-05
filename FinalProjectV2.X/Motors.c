@@ -151,10 +151,10 @@ void hardTurnLeft(void) {
 }
 void hardBackLeft(void){
     RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
-    RoboRightMtrSpeed(50 * FORWARD);
+    RoboRightMtrSpeed(40 * FORWARD);
 }
 void hardBackRight(void){
-    RoboLeftMtrSpeed(55 * FORWARD);
+    RoboLeftMtrSpeed(45 * FORWARD);
     RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
 }
 
