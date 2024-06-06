@@ -23,7 +23,7 @@
 //#define POSTFUNCTION_FOR_KEYBOARD_INPUT PostGenericService
 
 //define for TattleTale
-//#define USE_TATTLETALE
+#define USE_TATTLETALE
 
 //uncomment to supress the entry and exit events
 //#define SUPPRESS_EXIT_ENTRY_IN_TATTLE
@@ -98,11 +98,11 @@ static const char *EventNames[] = {
 #define TIMER5_RESP_FUNC PostBackTapeService
 #define TIMER6_RESP_FUNC PostRoboTopHSM
 #define TIMER7_RESP_FUNC PostRoboTopHSM
-#define TIMER8_RESP_FUNC PostRoboTopHSM
+#define TIMER8_RESP_FUNC TIMER_UNUSED
 #define TIMER9_RESP_FUNC PostRoboTopHSM
-#define TIMER10_RESP_FUNC PostRoboTopHSM
-#define TIMER11_RESP_FUNC PostRoboTopHSM
-#define TIMER12_RESP_FUNC PostRoboTopHSM
+#define TIMER10_RESP_FUNC TIMER_UNUSED
+#define TIMER11_RESP_FUNC TIMER_UNUSED
+#define TIMER12_RESP_FUNC TIMER_UNUSED
 #define TIMER13_RESP_FUNC PostRoboTopHSM
 #define TIMER14_RESP_FUNC TIMER_UNUSED
 #define TIMER15_RESP_FUNC PostRoboTopHSM
