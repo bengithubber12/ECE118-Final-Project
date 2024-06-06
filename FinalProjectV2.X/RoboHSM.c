@@ -43,7 +43,8 @@
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
  ******************************************************************************/
-#define ROAM_TIME 25000
+#define ROAM_TIME 30000
+
 /*******************************************************************************
  * MODULE #DEFINES                                                             *
  ******************************************************************************/
@@ -118,17 +119,26 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                 //InitMowerSubHSM();
                 beltDriveMax();
                 RC_AddPins(RC_PORTW08);
-                RC_SetPulseTime(RC_PORTW08, 900);
+                RC_SetPulseTime(RC_PORTW08, 1250);
                 // now put the machine into the actual initial state
                 nextState = MOWING;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
             }
             break;
-
+        /*
+         *
+         *
+         *
+         END OF INIT STATE
+         *
+         *
+         *
+         *
+         *
+         */
         case ROAMING:
             ThisEvent = RunRoamSubHSM(ThisEvent);
-            //printf("In Roaming Mode\r\n");
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
                     InitRoamSubHSM();
@@ -136,15 +146,10 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                     break;
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == ROAM_TIMER) {
-                        //curMotorBias ^= 1;
-                        //roboSway(curMotorBias); 
-                        //printf("Tape timer done\r\n");
                         nextState = FIND_DOOR;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
-                    //nextState = ROAMING;
-                    //makeTransition = TRUE;
                     break;
                 default:
                     break;
@@ -153,7 +158,6 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
             break;
 
         case FIND_DOOR:
-
             ThisEvent = RunFindDoorSubHSM(ThisEvent);
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
@@ -182,9 +186,9 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                     break;
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == DEPOSIT_TIMER) {
-                        RC_SetPulseTime(RC_PORTW08, 900);
+                        RC_SetPulseTime(RC_PORTW08, 1250);
                         pivotForwardRight();
-                        nextState = ROAMING;
+                        nextState = MOWING;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
@@ -199,7 +203,7 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
             ThisEvent = RunMowerSubHSM(ThisEvent);
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(MOWER_TIMER, 60000);
+                    ES_Timer_InitTimer(MOWER_TIMER, 130000); //Starting length is length of entire run
                     InitMowerSubHSM();
                     break;
                 case ES_TIMEOUT:
@@ -208,6 +212,18 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
+                    break;
+                case ES_TIMERSTOPPED:
+                    if (ThisEvent.EventParam == MOWER_TIMER) {
+                        nextState = ROAMING;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+                case DOOR_FOUND:
+                    nextState = FIND_DOOR;
+                    makeTransition = TRUE;
+                    ThisEvent.EventType = ES_NO_EVENT;
                     break;
                 default:
                     break;
