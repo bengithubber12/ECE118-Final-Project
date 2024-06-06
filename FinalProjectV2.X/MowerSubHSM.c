@@ -172,6 +172,7 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                     run();
                     ES_Timer_InitTimer(ADJUST_TIMER, 4000);
                     break;
+
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == ADJUST_TIMER) {
                         nextState = WALL_TURN;
@@ -204,6 +205,7 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                             break;
                     }
                     break;
+
                 case TAPE_STATUS_CHANGE:
                     nextState = FIND_TAPE;
                     makeTransition = TRUE;
@@ -236,12 +238,16 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                     break;
             }
             break;
+
         case FIND_TAPE: // in the first state, replace this with correct names
             slightLeftDrive();
             switch (ThisEvent.EventType) {
 
                 case TAPE_STATUS_CHANGE:
-
+                    nextState = PIVOT;
+                    makeTransition = TRUE;
+                    ThisEvent.EventType = ES_NO_EVENT;
+                    /*
                     if (ThisEvent.EventParam == LeftTape) {
                         nextState = PIVOT;
                         makeTransition = TRUE;
@@ -266,10 +272,6 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                         nextState = PIVOT;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
-                    } else if (ThisEvent.EventParam == LeftTape) {
-                        nextState = PIVOT;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
                     } else if (ThisEvent.EventParam == (TR_R_Tape + TopLeftTape) || ThisEvent.EventParam == (TL_L_Tape + TopRightTape)) {
                         nextState = PIVOT;
                         makeTransition = TRUE;
@@ -283,7 +285,7 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
-
+                     *  */
                     break;
 
                 case BACK_TAPE_STATUS_CHANGE:
@@ -323,13 +325,13 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                     }
                     break;
 
-                case BACK_TAPE_STATUS_CHANGE:
-                    if (ThisEvent.EventParam == 0x3 || ThisEvent.EventParam == 0x2) {
-                        nextState = FIND_TAPE;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                    break;
+                    //case BACK_TAPE_STATUS_CHANGE:
+                    //   if (ThisEvent.EventParam == 0x3 || ThisEvent.EventParam == 0x2) {
+                    //       nextState = FIND_TAPE;
+                    //       makeTransition = TRUE;
+                    //       ThisEvent.EventType = ES_NO_EVENT;
+                    //   }
+                    //   break;
 
                 case BUMPER_STATUS_CHANGE:
                     if ((ThisEvent.EventParam == 0x1) || (ThisEvent.EventParam == 0x2) || (ThisEvent.EventParam == 0x3)) {
@@ -346,15 +348,17 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
             break;
 
         case TOWARD_TAPE:
-            RoboRightMtrSpeed(60);
-            RoboLeftMtrSpeed(40);
+            if(PORTZ06_BIT){
+                RoboRightMtrSpeed(50);
+                RoboLeftMtrSpeed(20);
+            }else {
+                  RoboRightMtrSpeed(50);
+                RoboLeftMtrSpeed(70);
+            }
             switch (ThisEvent.EventType) {
-                case TAPE_STATUS_CHANGE:
-                    if (PORTZ06_BIT) {
-                        nextState = AWAY_TAPE;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    } else if (PORTZ08_BIT && PORTZ05_BIT) {
+                case BACK_TAPE_STATUS_CHANGE:
+                case TAPE_STATUS_CHANGE:   
+                 if (PORTZ05_BIT && PORTZ08_BIT) {
                         nextState = CORNER;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
@@ -384,19 +388,25 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
             break;
 
         case AWAY_TAPE:
-            RoboRightMtrSpeed(60);
-            RoboLeftMtrSpeed(75);
+            RoboRightMtrSpeed(50);
+            RoboLeftMtrSpeed(65);
             switch (ThisEvent.EventType) {
+                case BACK_TAPE_STATUS_CHANGE:
                 case TAPE_STATUS_CHANGE:
                     if (!PORTZ06_BIT) {
                         nextState = TOWARD_TAPE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
-                    } else if (PORTZ06_BIT && PORTZ07_BIT) {
+                    } else if (PORTZ05_BIT && PORTZ08_BIT) {
                         nextState = CORNER;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
+                    //                    else if (ThisEvent.EventParam != 0){
+                    //                        nextState = PIVOT;
+                    //                        makeTransition = TRUE;
+                    //                        ThisEvent.EventType = ES_NO_EVENT;
+                    //                    }
                     break;
 
                     //case BACK_TAPE_STATUS_CHANGE:
@@ -422,185 +432,203 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
             break;
 
         case CORNER:
-            RoboRightMtrSpeed(-40);
+            RoboRightMtrSpeed(-45);
             RoboLeftMtrSpeed(40);
             //pivotBackLeft();
             switch (ThisEvent.EventType) {
+                case ES_ENTRY:
                 case TAPE_STATUS_CHANGE:
-                    if (ThisEvent.EventParam == 0x1) {
-                        nextState = AWAY_TAPE;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-
-                //case BACK_TAPE_STATUS_CHANGE:
-                    //if (ThisEvent.EventParam == 0x3 || ThisEvent.EventParam == 0x1) {
-                    //    nextState = CORNER_ADJUST;
-                    //    makeTransition = TRUE;
-                    //    ThisEvent.EventType = ES_NO_EVENT;
-                    //    break;
-                    //}
-                    break;
-
-                case BUMPER_STATUS_CHANGE:
-                    if ((ThisEvent.EventParam == 0x1) || (ThisEvent.EventParam == 0x2) || (ThisEvent.EventParam == 0x3)) {
-                        nextState = ALIGN;
+                case BACK_TAPE_STATUS_CHANGE:
+                    if (PORTZ09_BIT) {
+                        nextState = TOWARD_TAPE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                         break;
                     }
-                    break;
-
                 default:
                     break;
             }
             break;
+            //                    if ((ThisEvent.EventParam == 0x3) || (ThisEvent.EventParam == 0x1)) {
+            //                        nextState = AWAY_TAPE;
+            //                        makeTransition = TRUE;
+            //                        ThisEvent.EventType = ES_NO_EVENT;
+            //                        break;
+            //                    } else if (ThisEvent.EventParam == 0x3 && PORTZ06_BIT){
+            //                        nextState = AWAY_TAPE;
+            //                        makeTransition = TRUE;
+            //                        ThisEvent.EventType = ES_NO_EVENT;
+            //                        break;
+            //                    }
+            //                    break;
+            //                case TAPE_STATUS_CHANGE:
+            //                    if (ThisEvent.EventParam == 0x01 && PORTZ11_BIT && PORTZ09_BIT){
+            //                        nextState = AWAY_TAPE;
+            //                        makeTransition = TRUE;
+            //                        ThisEvent.EventType = ES_NO_EVENT;
+            //                        break;
+//    }
+//            break;
+//
+//        case BUMPER_STATUS_CHANGE:
+//            if ((ThisEvent.EventParam == 0x1) || (ThisEvent.EventParam == 0x2) || (ThisEvent.EventParam == 0x3)) {
+//                nextState = ALIGN;
+//                makeTransition = TRUE;
+//                ThisEvent.EventType = ES_NO_EVENT;
+//                break;
+//            }
+//            break;
+//
+//        default:
+//            break;
+//    }
+//    break;
 
-        case CORNER_ADJUST:
-            stop();
-            switch (ThisEvent.EventType) {
+    case CORNER_ADJUST:
+    stop();
+    switch (ThisEvent.EventType) {
 
-                case BACK_TAPE_STATUS_CHANGE:
-                    if (ThisEvent.EventParam == 0x3) {
-                        nextState = PIVOT;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                    break;
-
-                case BUMPER_STATUS_CHANGE:
-                    if ((ThisEvent.EventParam == 0x1) || (ThisEvent.EventParam == 0x2) || (ThisEvent.EventParam == 0x3)) {
-                        nextState = ALIGN;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                        break;
-                    }
-                    break;
-
-                default:
-                    break;
+        case BACK_TAPE_STATUS_CHANGE:
+            if (ThisEvent.EventParam == 0x3) {
+                nextState = PIVOT;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
             }
             break;
 
-        case FOLLOW_TAPE:
-            run();
-            switch (ThisEvent.EventType) {
-                case TAPE_STATUS_CHANGE:
-                    if ((ThisEvent.EventParam == (RightTape + TopRightTape)) || (ThisEvent.EventParam == (RightTape + TopRightTape + TopLeftTape)) || (ThisEvent.EventParam == (RightTape + TopLeftTape))) {
-                        nextState = PIVOT;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    } else if (ThisEvent.EventParam == AllTopSensors) {
-                        nextState = PIVOT;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    } else if (ThisEvent.EventParam == BothTopTape) {
-                        nextState = PIVOT;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    } else if (ThisEvent.EventParam == NoTape) {
-                        nextState = FIND_TAPE;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    } else {
-                        nextState = FIND_TAPE;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-
-                    }
-                    break;
-
-                case BUMPER_STATUS_CHANGE:
-
-                    if ((ThisEvent.EventParam == 0x1) || (ThisEvent.EventParam == 0x2) || (ThisEvent.EventParam == 0x3)) {
-                        nextState = ALIGN;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                    break;
-
-                default:
-                    break;
-
+        case BUMPER_STATUS_CHANGE:
+            if ((ThisEvent.EventParam == 0x1) || (ThisEvent.EventParam == 0x2) || (ThisEvent.EventParam == 0x3)) {
+                nextState = ALIGN;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+                break;
             }
             break;
 
-        case ALIGN:
-            pivotBackLeft();
-            switch (ThisEvent.EventType) {
-                case BACK_TAPE_STATUS_CHANGE:
-                    if (ThisEvent.EventParam == 0x3) {
-                        nextState = MOW;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                    break;
-                default:
-                    break;
-
-            }
+        default:
             break;
-
-        case TURN:
-            hardTurnRight();
-            switch (ThisEvent.EventType) {
-                case BACK_TAPE_STATUS_CHANGE:
-                    if (ThisEvent.EventParam == 0x1) {
-                        nextState = REALIGN;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                    break;
-                default:
-                    break;
-            }
-            break;
-
-        case REALIGN:
-            pivotBackRight();
-            switch (ThisEvent.EventType) {
-                case BACK_TAPE_STATUS_CHANGE:
-                    if (ThisEvent.EventParam == 0x3) {
-                        nextState = MOW;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                    break;
-                default:
-                    break;
-
-            }
-            break;
-
-        case MOW:
-            run();
-            switch (ThisEvent.EventType) {
-
-                case TAPE_STATUS_CHANGE:
-                    if (ThisEvent.EventParam == 0x02 || ThisEvent.EventParam == 0x04 || ThisEvent.EventParam == 0x06) {
-                        nextState = TURN;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                    break;
-                default:
-                    break;
-            }
-            break;
-
-        default: // all unhandled states fall into here
-            break;
-    } // end switch on Current State
-
-    if (makeTransition == TRUE) { // making a state transition, send EXIT and ENTRY
-        // recursively call the current state with an exit event
-        RunMowerSubHSM(EXIT_EVENT); // <- rename to your own Run function
-        CurrentState = nextState;
-        RunMowerSubHSM(ENTRY_EVENT); // <- rename to your own Run function
     }
+    break;
 
-    ES_Tail(); // trace call stack end
-    return ThisEvent;
+    case FOLLOW_TAPE:
+    run();
+    switch (ThisEvent.EventType) {
+        case TAPE_STATUS_CHANGE:
+            if ((ThisEvent.EventParam == (RightTape + TopRightTape)) || (ThisEvent.EventParam == (RightTape + TopRightTape + TopLeftTape)) || (ThisEvent.EventParam == (RightTape + TopLeftTape))) {
+                nextState = PIVOT;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            } else if (ThisEvent.EventParam == AllTopSensors) {
+                nextState = PIVOT;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            } else if (ThisEvent.EventParam == BothTopTape) {
+                nextState = PIVOT;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            } else if (ThisEvent.EventParam == NoTape) {
+                nextState = FIND_TAPE;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            } else {
+                nextState = FIND_TAPE;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+
+            }
+            break;
+
+        case BUMPER_STATUS_CHANGE:
+
+            if ((ThisEvent.EventParam == 0x1) || (ThisEvent.EventParam == 0x2) || (ThisEvent.EventParam == 0x3)) {
+                nextState = ALIGN;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            }
+            break;
+
+        default:
+            break;
+
+    }
+    break;
+
+    case ALIGN:
+    pivotBackLeft();
+    switch (ThisEvent.EventType) {
+        case BACK_TAPE_STATUS_CHANGE:
+            if (ThisEvent.EventParam == 0x3) {
+                nextState = MOW;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            }
+            break;
+        default:
+            break;
+
+    }
+    break;
+
+    case TURN:
+    hardTurnRight();
+    switch (ThisEvent.EventType) {
+        case BACK_TAPE_STATUS_CHANGE:
+            if (ThisEvent.EventParam == 0x1) {
+                nextState = REALIGN;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            }
+            break;
+        default:
+            break;
+    }
+    break;
+
+    case REALIGN:
+    pivotBackRight();
+    switch (ThisEvent.EventType) {
+        case BACK_TAPE_STATUS_CHANGE:
+            if (ThisEvent.EventParam == 0x3) {
+                nextState = MOW;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            }
+            break;
+        default:
+            break;
+
+    }
+    break;
+
+    case MOW:
+    run();
+    switch (ThisEvent.EventType) {
+
+        case TAPE_STATUS_CHANGE:
+            if (ThisEvent.EventParam == 0x02 || ThisEvent.EventParam == 0x04 || ThisEvent.EventParam == 0x06) {
+                nextState = TURN;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            }
+            break;
+        default:
+            break;
+    }
+    break;
+
+    default: // all unhandled states fall into here
+    break;
+} // end switch on Current State
+
+if (makeTransition == TRUE) { // making a state transition, send EXIT and ENTRY
+    // recursively call the current state with an exit event
+    RunMowerSubHSM(EXIT_EVENT); // <- rename to your own Run function
+    CurrentState = nextState;
+    RunMowerSubHSM(ENTRY_EVENT); // <- rename to your own Run function
+}
+
+ES_Tail(); // trace call stack end
+return ThisEvent;
 }
 
 
