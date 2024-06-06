@@ -47,6 +47,7 @@ typedef enum {
     FOLLOW_TAPE,
     BUMPER_HANDLER,
     PIVOT,
+    TURN_TIME,
     FIRST_TURN,
     SECOND_TURN,
     THIRD_TURN,
@@ -59,6 +60,7 @@ static const char *StateNames[] = {
 	"FOLLOW_TAPE",
 	"BUMPER_HANDLER",
 	"PIVOT",
+	"TURN_TIME",
 	"FIRST_TURN",
 	"SECOND_TURN",
 	"THIRD_TURN",
@@ -69,10 +71,10 @@ static const char *StateNames[] = {
 #define QUARTER_SECOND 250
 #define HALF_SECOND 500
 #define ONE_SECOND 1000
-#define STRAIGHT_TIMER 8
-#define TURN_TIMER_ONE 10
-#define TURN_TIMER_TWO 11
-#define TURN_TIMER_THREE 12
+#define STRAIGHT_TIMER 7
+#define TURN_TIMER_ONE 7
+#define TURN_TIMER_TWO 7
+#define TURN_TIMER_THREE 7
 #define BUMPER_TIMER 7
 
 //Tape Definitions
@@ -187,13 +189,18 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
             break;
 
         case FIND_TAPE: // in the first state, replace this with correct names
-            slightRightDrive();
+            
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
+                    slightRightDrive();
                     break;
 
                 case TAPE_STATUS_CHANGE:
                     tapeFound = 1;
+                    nextState = PIVOT;
+                    makeTransition = TRUE;
+                    ThisEvent.EventType = ES_NO_EVENT;
+                    /*
                     if (ThisEvent.EventParam == LeftTape) {
                         nextState = PIVOT;
                         makeTransition = TRUE;
@@ -229,8 +236,9 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                     } else {
                         tapeFound = 0;
                     }
+                     * */
                     break;
-                    
+
                 case BACK_TAPE_STATUS_CHANGE:
                     if (ThisEvent.EventParam == 0x3) {
                         nextState = FOLLOW_TAPE;
@@ -242,8 +250,19 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
                     break;
-                    
+
                 case BUMPER_STATUS_CHANGE:
+                    if (!PORTX12_BIT) {// Front Left Hit
+                        nextState = FIRST_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                    } else if (!PORTX05_BIT) {// Front Right Hit
+                        nextState = FIRST_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                    }
                     nextState = BUMPER_HANDLER;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
@@ -262,39 +281,62 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                         nextState = FIND_TAPE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                    break;
-
-                case BACK_TAPE_STATUS_CHANGE:
-                    if (ThisEvent.EventParam == 0x3 || ThisEvent.EventParam == 0x2 || ThisEvent.EventParam == 0x1) {
-                        nextState = FIND_TAPE;
+                    } else if (ThisEvent.EventParam == RightTape && PORTZ11_BIT) {
+                        nextState = FOLLOW_TAPE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
                     break;
-                    
+
+                case BACK_TAPE_STATUS_CHANGE:
+                    if (ThisEvent.EventParam == 0x3 || ThisEvent.EventParam == 0x2) {
+                        nextState = FIND_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == 0x2 && PORTZ07_BIT) {
+                        nextState = FOLLOW_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+
                 case BUMPER_STATUS_CHANGE:
+                    if (!PORTX12_BIT) {// Front Left Hit
+                        nextState = FIRST_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                    } else if (!PORTX05_BIT) {// Front Right Hit
+                        nextState = FIRST_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                    }
                     nextState = BUMPER_HANDLER;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
                     break;
             }
             break;
-            
+
         case FOLLOW_TAPE:
             run();
             switch (ThisEvent.EventType) {
                 case TAPE_STATUS_CHANGE:
                     if ((ThisEvent.EventParam == (RightTape + TopRightTape)) || (ThisEvent.EventParam == (RightTape + TopRightTape + TopLeftTape)) || (ThisEvent.EventParam == (RightTape + TopLeftTape))) {
-                        nextState = PIVOT;
+                        nextState = TURN_TIME;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == (TR_R_Tape + TopLeftTape) || ThisEvent.EventParam == (TL_L_Tape + TopRightTape)) {
+                        nextState = TURN_TIME;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     } else if (ThisEvent.EventParam == AllTopSensors) {
-                        nextState = PIVOT;
+                        nextState = TURN_TIME;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     } else if (ThisEvent.EventParam == BothTopTape) {
-                        nextState = PIVOT;
+                        nextState = TURN_TIME;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     } else if (ThisEvent.EventParam == NoTape) {
@@ -302,26 +344,24 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     } else {
-
                         nextState = FIND_TAPE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
-
                     }
                     break;
 
-                    //if ((ThisEvent.EventParam == (BothRightTape + TopRightTape)) | (ThisEvent.EventParam == (BothRightTape + TopRightTape))) {
-                    //    nextState = CORNER_TURN;
-                    //    makeTransition = TRUE;
-                    //    ThisEvent.EventType = ES_NO_EVENT;
-                    //}
-                    //else {
-                    //    nextState = ALIGN;
-                    //    makeTransition = TRUE;
-                    //    ThisEvent.EventType = ES_NO_EVENT;
-                    //}
-
                 case BUMPER_STATUS_CHANGE:
+                    if (!PORTX12_BIT) {// Front Left Hit
+                        nextState = FIRST_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                    } else if (!PORTX05_BIT) {// Front Right Hit
+                        nextState = FIRST_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                    }
                     nextState = BUMPER_HANDLER;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
@@ -329,52 +369,72 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
 
             }
             break;
-
+            
+        case TURN_TIME:
+            tankTurnLeft();
+            switch (ThisEvent.EventType) {
+                case BACK_TAPE_STATUS_CHANGE:
+                    if (PORTZ09_BIT && PORTZ11_BIT && PORTZ07_BIT) {
+                        nextState = FOLLOW_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (PORTZ11_BIT && PORTZ07_BIT) {
+                        nextState = FOLLOW_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+                case TAPE_STATUS_CHANGE:
+                    if (PORTZ09_BIT && PORTZ11_BIT && PORTZ07_BIT) {
+                        nextState = FOLLOW_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (PORTZ11_BIT && PORTZ07_BIT) {
+                        nextState = FOLLOW_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (PORTZ05_BIT && PORTZ09_BIT) {
+                        nextState = PIVOT;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (PORTZ05_BIT && PORTZ07_BIT) {
+                        nextState = PIVOT;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == TR_R_Tape) {
+                        nextState = PIVOT;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+                case BUMPER_STATUS_CHANGE:
+                    if (!PORTX12_BIT) {// Front Left Hit
+                        nextState = FIRST_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                    } else if (!PORTX05_BIT) {// Front Right Hit
+                        nextState = FIRST_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                    }
+                    nextState = BUMPER_HANDLER;
+                    makeTransition = TRUE;
+                    ThisEvent.EventType = ES_NO_EVENT;
+                    break;
+            }
+            break;
+            
         case BUMPER_HANDLER:
-            //Read the current bumpers
-            bumperRead = ~((PORTX08_BIT << 7) | ((PORTX06_BIT << 6) | ((PORTX05_BIT << 5) | ((PORTX12_BIT << 4) | ((PORTX11_BIT << 3) | ((PORTX04_BIT << 2) | ((PORTX03_BIT << 1) | ((PORTX10_BIT)))))))));
-            if ((int) bumperRead == BOT_BRB) {// Back Bottom Right Bumper
+            //bumperRead = ~((PORTX08_BIT << 7) | ((PORTX06_BIT << 6) | ((PORTX05_BIT << 5) | ((PORTX12_BIT << 4) | ((PORTX11_BIT << 3) | ((PORTX04_BIT << 2) | ((PORTX03_BIT << 1) | ((PORTX10_BIT)))))))));
+            if (!PORTX04_BIT) {// Back Bottom Right Bumper
                 pivotForwardRight();
-                //printf("Back Right Bumper\r\n");
-            } else if ((int) bumperRead == BOT_BLB) {// Back Bottom Left Bumper
+            } else if (!PORTX11_BIT) {// Back Bottom Left Bumper
                 pivotForwardLeft();
-                //printf("Back Left Bumper\r\n");
-            } else if ((int) bumperRead == BOT_BackBumpers) {// Both Bottom Back Bumpers
-                run();
-                //printf("Both Back Bumpers\r\n");
-
-                //Obstacle detection cases
-            } else if (!PORTX12_BIT) {// Front Left Hit
-                nextState = FIRST_TURN;
-                makeTransition = TRUE;
-                ThisEvent.EventType = ES_NO_EVENT;
-                break;
-                //printf("Front Right Bumper\r\n");
-            } else if (!PORTX05_BIT) {// Front Right Hit
-                nextState = FIRST_TURN;
-                makeTransition = TRUE;
-                ThisEvent.EventType = ES_NO_EVENT;
-                break;
-                //printf("Front Right Bumper\r\n");
-            } else if (!PORTX12_BIT && !PORTX05_BIT) {// Head Hit
-                nextState = FIRST_TURN;
-                makeTransition = TRUE;
-                ThisEvent.EventType = ES_NO_EVENT;
-                break;
-                //printf("Both Front Bumpers\r\n");
-            } else if ((int) bumperRead == (TOP_BLB + BOT_BLB)) {// Back Left Hit
-                pivotForwardRight();
-                //printf("Back Right Bumper\r\n");
-            } else if ((int) bumperRead == (TOP_BRB + BOT_BRB)) {// Back Right Hit
-                pivotForwardLeft();
-                //printf("Back Left Bumper\r\n");
-            } else if ((int) bumperRead == (TOP_BackBumpers + BOT_BackBumpers)) {// Back Hit
-                run();
-                //printf("Both Back Bumpers\r\n");
-            } else if ((int) bumperRead == BOT_FLB) {// Bottom Front Left Bumper
-
+            } else if (!PORTX10_BIT) {// Bottom Front Left Bumper
                 if (tapeFound == 1) {
-
+                    printf("Front Left Bumper\r\n");
                     PostRoboTopHSM((ES_Event) {
                         DOOR_FOUND, 0
                     });
@@ -382,9 +442,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                     pivotBackLeft();
                 }
 
-
-                //printf("Front Left Bumper\r\n");
-            } else if ((int) bumperRead == BOT_FRB) {// Bottom Front Right Bumper
+            } else if (!PORTX03_BIT) {// Bottom Front Right Bumper
                 if (tapeFound == 1) {
 
                     PostRoboTopHSM((ES_Event) {
@@ -393,21 +451,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                 } else {
                     pivotBackRight();
                 }
-
-                //printf("Front Right Bumper\r\n");
-            } else if (((int) bumperRead == BOT_FrontBumpers)) {//Both Bottom Front Bumpers
-                if (tapeFound == 1) {
-
-                    PostRoboTopHSM((ES_Event) {
-                        DOOR_FOUND, 0
-                    });
-                } else {
-                    pivotBackRight();
-                }
-
-                //printf("Both Front Bumpers\r\n");
-            }//Determine which bumper is triggered 
-           
+            }
 
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
@@ -420,12 +464,9 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
 
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == BUMPER_TIMER) {
-                        //printf("Bumper timer done\r\n");
-                        if ((int) bumperRead == 0) {
-                            nextState = FIND_TAPE;
-                            makeTransition = TRUE;
-                            ThisEvent.EventType = ES_NO_EVENT;
-                        }
+                        nextState = FIND_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
 
                     }
                     break;
@@ -441,17 +482,16 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                     break;
             }
             break;
-        
+
         case DRIVE:
             run();
             switch (ThisEvent.EventType) {
-                
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(STRAIGHT_TIMER, 150);
+                    ES_Timer_InitTimer(STRAIGHT_TIMER, 850);
                     break;
 
                 case ES_EXIT:
-                    ES_Timer_SetTimer(STRAIGHT_TIMER, 150);
+                    ES_Timer_SetTimer(STRAIGHT_TIMER, 850);
                     break;
                     
                 case TAPE_STATUS_CHANGE:
@@ -459,7 +499,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
                     break;
-                  
+
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == STRAIGHT_TIMER) {
                         if (driveTracker == 1) {
@@ -470,22 +510,37 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                             nextState = THIRD_TURN;
                             makeTransition = TRUE;
                             ThisEvent.EventType = ES_NO_EVENT;
+                        } else {
+                            nextState = FIND_TAPE;
+                            makeTransition = TRUE;
+                            ThisEvent.EventType = ES_NO_EVENT;
+                            break;
                         }
                     }
                     break;
+                    
+                case BUMPER_STATUS_CHANGE:
+                    if ((ThisEvent.EventParam == 0x10) || (ThisEvent.EventParam == 0x20)) {
+                        nextState = FIRST_TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
+                default:
+                    break;
             }
             break;
-             
+
         case FIRST_TURN:
-            driveTracker++;
+            driveTracker = 1;
             tankTurnLeft();
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(TURN_TIMER_ONE, 150);
+                    ES_Timer_InitTimer(TURN_TIMER_ONE, 500);
                     break;
 
                 case ES_EXIT:
-                    ES_Timer_SetTimer(TURN_TIMER_ONE, 150);
+                    ES_Timer_SetTimer(TURN_TIMER_ONE, 500);
                     break;
 
                 case ES_TIMEOUT:
@@ -493,21 +548,23 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                         nextState = DRIVE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
-                    } 
+                    }
+                    break;
+                default:
                     break;
             }
             break;
-            
+
         case SECOND_TURN:
-            driveTracker++;
-            tankTurnLeft();
+            driveTracker = 2;
+            tankTurnRight();
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(TURN_TIMER_TWO, 150);
+                    ES_Timer_InitTimer(TURN_TIMER_TWO, 500);
                     break;
 
                 case ES_EXIT:
-                    ES_Timer_SetTimer(TURN_TIMER_TWO, 150);
+                    ES_Timer_SetTimer(TURN_TIMER_TWO, 500);
                     break;
 
                 case ES_TIMEOUT:
@@ -515,21 +572,23 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                         nextState = DRIVE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
-                    } 
+                    }
+                    break;
+                default:
                     break;
             }
             break;
-            
+
         case THIRD_TURN:
-            driveTracker++;
-            tankTurnLeft();
+            driveTracker = 3;
+            tankTurnRight();
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(TURN_TIMER_THREE, 150);
+                    ES_Timer_InitTimer(TURN_TIMER_THREE, 500);
                     break;
 
                 case ES_EXIT:
-                    ES_Timer_SetTimer(TURN_TIMER_THREE, 150);
+                    ES_Timer_SetTimer(TURN_TIMER_THREE, 500);
                     break;
 
                 case ES_TIMEOUT:
@@ -537,7 +596,9 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                         nextState = DRIVE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
-                    } 
+                    }
+                    break;
+                default:
                     break;
             }
             break;
