@@ -17,7 +17,7 @@
 #include <xc.h>
 #include "Motors.h"
 
-#define BUMPER_TIMER_TICKS 15
+#define BUMPER_TIMER_TICKS 20
 
 static uint8_t MyPriority;
 

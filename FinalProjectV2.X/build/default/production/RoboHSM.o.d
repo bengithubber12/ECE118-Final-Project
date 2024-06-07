@@ -6,7 +6,7 @@ build/default/production/RoboHSM.o: RoboHSM.c ES_Configure.h \
  C:/ECE118/include/ES_PostList.h C:/ECE118/include/ES_PriorTables.h \
  C:/ECE118/include/ES_Queue.h C:/ECE118/include/ES_ServiceHeaders.h \
  ES_Configure.h TapeService.h ES_Configure.h RoboHSM.h BumperService.h \
- BackTapeService.h C:/ECE118/include/ES_TattleTale.h \
+ WallService.h C:/ECE118/include/ES_TattleTale.h \
  C:/ECE118/include/BOARD.h TapeService.h Motors.h RoboHSM.h RoamSubHSM.h \
  DepositSubHSM.h MowerSubHSM.h FindDoorSubHSM.h \
  C:/ECE118/include/RC_Servo.h
@@ -47,7 +47,7 @@ RoboHSM.h:
 
 BumperService.h:
 
-BackTapeService.h:
+WallService.h:
 
 C:/ECE118/include/ES_TattleTale.h:
 

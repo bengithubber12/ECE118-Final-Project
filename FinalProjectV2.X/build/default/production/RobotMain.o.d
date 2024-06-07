@@ -7,7 +7,7 @@ build/default/production/RobotMain.o: RobotMain.c \
  C:/ECE118/include/ES_PostList.h C:/ECE118/include/ES_PriorTables.h \
  C:/ECE118/include/ES_Queue.h C:/ECE118/include/ES_ServiceHeaders.h \
  ES_Configure.h TapeService.h ES_Configure.h RoboHSM.h BumperService.h \
- BackTapeService.h C:/ECE118/include/ES_TattleTale.h \
+ WallService.h C:/ECE118/include/ES_TattleTale.h \
  C:/ECE118/include/RC_Servo.h
 
 C:/ECE118/include/BOARD.h:
@@ -50,7 +50,7 @@ RoboHSM.h:
 
 BumperService.h:
 
-BackTapeService.h:
+WallService.h:
 
 C:/ECE118/include/ES_TattleTale.h:
 

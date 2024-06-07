@@ -37,6 +37,8 @@
 #include "BumperService.h"
 #include "FindDoorSubHSM.h"
 #include "RC_Servo.h"
+#include "IO_Ports.h"
+#include <xc.h>
 #include <stdio.h>
 
 /*******************************************************************************
@@ -62,6 +64,7 @@ static const char *StateNames[] = {
 #define ONE_SECOND 1000
 #define TURN_TIMER 9
 #define BACK_UP_TIMER 9
+#define CORRECTION_TIMER 8
 #define DEPOSIT_TIME 10000
 
 //Bumper Definitions
@@ -183,10 +186,10 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
             tankTurnLeft();
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(TURN_TIMER, 900);
+                    ES_Timer_InitTimer(TURN_TIMER, 850);
                     break;
                 case ES_EXIT:
-                    ES_Timer_SetTimer(TURN_TIMER, 900);
+                    ES_Timer_SetTimer(TURN_TIMER, 850);
                     break;
 
                 case ES_TIMEOUT:
@@ -209,19 +212,18 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
                         case BOT_BRB:
                             RoboLeftMtrSpeed(-75);
                             RoboRightMtrSpeed(0);
-                            ES_Timer_InitTimer(TURN_TIMER, 100);
+                            ES_Timer_InitTimer(TURN_TIMER, 400);
                             //servo stuff
                             //stop();
                             break;
                         case BOT_BLB:
                             RoboLeftMtrSpeed(0);
                             RoboRightMtrSpeed(-80);
-                            ES_Timer_InitTimer(TURN_TIMER, 100);
+                            ES_Timer_InitTimer(TURN_TIMER, 400);
                             //servo stuff
                             break;
                         case BOT_BackBumpers:
                             //servo stuff
-                            printf("Triggering servo\r\n");
                             stop();
                             RoboBeltMtrSpeed(0);
                             RC_SetPulseTime(RC_PORTW08, 2400);
@@ -243,10 +245,17 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
                     if (ThisEvent.EventParam == TURN_TIMER) {
                         stop();
                         RoboBeltMtrSpeed(0);
-                        RC_SetPulseTime(RC_PORTW08, 2000);
+                        RC_SetPulseTime(RC_PORTW08, 2400);
+                    } else if (ThisEvent.EventParam == CORRECTION_TIMER){
+                        goBackward();
                     }
                     break;
-
+                case TAPE_STATUS_CHANGE:
+                    if (ThisEvent.EventParam == 0x8 && PORTX10_BIT && PORTX03_BIT && PORTX04_BIT && PORTX11_BIT){
+                        tankTurnLeft();
+                        ES_Timer_InitTimer(CORRECTION_TIMER, 250);
+                    }
+                    break;
                 default: // all unhandled events pass the event back up to the next level
                     break;
             }

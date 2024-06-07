@@ -6,7 +6,7 @@ build/default/production/FindDoorSubHSM.o: FindDoorSubHSM.c \
  C:/ECE118/include/ES_Port.h C:/ECE118/include/ES_PostList.h \
  C:/ECE118/include/ES_PriorTables.h C:/ECE118/include/ES_Queue.h \
  C:/ECE118/include/ES_ServiceHeaders.h ES_Configure.h TapeService.h \
- ES_Configure.h RoboHSM.h BumperService.h BackTapeService.h \
+ ES_Configure.h RoboHSM.h BumperService.h WallService.h \
  C:/ECE118/include/ES_TattleTale.h C:/ECE118/include/BOARD.h RoboHSM.h \
  FindDoorSubHSM.h DepositSubHSM.h Motors.h C:/ECE118/include/IO_Ports.h
 
@@ -46,7 +46,7 @@ RoboHSM.h:
 
 BumperService.h:
 
-BackTapeService.h:
+WallService.h:
 
 C:/ECE118/include/ES_TattleTale.h:
 
