@@ -225,7 +225,6 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
                         case BOT_BackBumpers:
                             //servo stuff
                             stop();
-                            RoboBeltMtrSpeed(0);
                             RC_SetPulseTime(RC_PORTW08, 2400);
                             break;
 
@@ -244,7 +243,6 @@ ES_Event RunDepositSubHSM(ES_Event ThisEvent) {
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == TURN_TIMER) {
                         stop();
-                        RoboBeltMtrSpeed(0);
                         RC_SetPulseTime(RC_PORTW08, 2400);
                     } else if (ThisEvent.EventParam == CORRECTION_TIMER){
                         goBackward();

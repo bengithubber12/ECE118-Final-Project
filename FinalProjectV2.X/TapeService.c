@@ -28,7 +28,7 @@
 #include "Motors.h"
 #include "IO_Ports.h"
 
-#define TIMER_1_TICKS 5
+#define TIMER_1_TICKS 25
 
 static uint8_t MyPriority;
 
@@ -41,11 +41,11 @@ uint8_t InitTapeService(uint8_t Priority) {
     
     //Setup tape sensors pins
     PORTZ06_TRIS = 1;  //TapeLeft
-    PORTZ08_TRIS = 1;  //TapeTopLeft
-    PORTZ05_TRIS = 1;  //TapeTopRight 
+    //PORTZ08_TRIS = 1;  //TapeTopLeft
+    //PORTZ05_TRIS = 1;  //TapeTopRight 
     PORTZ07_TRIS = 1;  //TapeRight
-   // PORTZ09_TRIS = 1;  //TapeBackRight
-    //PORTZ11_TRIS = 1;  //TapeBackLeft
+    PORTZ09_TRIS = 1;  //TapeBackRight
+    PORTZ11_TRIS = 1;  //TapeBackLeft
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -74,7 +74,7 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
             break;
         case ES_TIMEOUT:
             ES_Timer_InitTimer(TAPE_SERVICE_TIMER, TIMER_1_TICKS); // runs every 5ms
-            curEvent = ((PORTZ07_BIT << 3) | ((PORTZ05_BIT << 2) | ((PORTZ08_BIT << 1) | ((PORTZ06_BIT)))));
+            curEvent = ((PORTZ11_BIT << 3) | ((PORTZ09_BIT << 2) | ((PORTZ07_BIT << 1) | ((PORTZ06_BIT)))));
             
             // compare previous and current values
             if (lastEvent != curEvent) {

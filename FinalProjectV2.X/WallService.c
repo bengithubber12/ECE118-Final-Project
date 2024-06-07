@@ -41,8 +41,8 @@ uint8_t InitWallTapeService(uint8_t Priority) {
     MyPriority = Priority;
     
     //Setup tape sensors pins
-    PORTZ05_TRIS = 1;
-    PORTZ08_TRIS = 1;
+    PORTZ05_TRIS = 1;  //right
+    PORTZ08_TRIS = 1; //left
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -71,7 +71,7 @@ ES_Event RunWallTapeService(ES_Event ThisEvent) {
             break;
         case ES_TIMEOUT:
             ES_Timer_InitTimer(WALL_TAPE_SERVICE_TIMER, TIMER_5_TICKS); // runs every 5ms
-            curEvent =  ((PORTZ05_BIT << 1) | ((PORTZ08_BIT)));
+            curEvent =  ((!PORTZ05_BIT << 1) | ((!PORTZ08_BIT)));
             
             // compare previous and current values
             if (lastEvent != curEvent) {

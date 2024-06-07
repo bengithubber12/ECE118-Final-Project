@@ -121,7 +121,7 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                 RC_AddPins(RC_PORTW08);
                 RC_SetPulseTime(RC_PORTW08, 1250);
                 // now put the machine into the actual initial state
-                nextState = MOWING;
+                nextState = ROAMING;
                 makeTransition = TRUE;
                 ThisEvent.EventType = ES_NO_EVENT;
             }
@@ -177,17 +177,15 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
             break;
 
         case DEPOSIT:
-            RoboBeltMtrSpeed(0);
             ThisEvent = RunDepositSubHSM(ThisEvent);
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(DEPOSIT_TIMER, 10000);
+                    ES_Timer_InitTimer(DEPOSIT_TIMER, 6000);
                     InitDepositSubHSM();
                     break;
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == DEPOSIT_TIMER) {
                         RC_SetPulseTime(RC_PORTW08, 1250);
-                        pivotForwardRight();
                         nextState = MOWING;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
@@ -200,19 +198,20 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
             break;
 
         case MOWING:
+            beltDriveMax();
             ThisEvent = RunMowerSubHSM(ThisEvent);
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(MOWER_TIMER, 130000); //Starting length is length of entire run
+                    //ES_Timer_InitTimer(MOWER_TIMER, 000); //Starting length is length of entire run
                     InitMowerSubHSM();
                     break;
-                case ES_TIMEOUT:
-                    if (ThisEvent.EventParam == MOWER_TIMER) {
-                        nextState = ROAMING;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                    break;
+                //case ES_TIMEOUT:
+                   // if (ThisEvent.EventParam == MOWER_TIMER) {
+                    //    nextState = ROAMING;
+                    //   makeTransition = TRUE;
+                    //    ThisEvent.EventType = ES_NO_EVENT;
+                    //}
+                    //break;
                 case ES_TIMERSTOPPED:
                     if (ThisEvent.EventParam == MOWER_TIMER) {
                         nextState = ROAMING;
