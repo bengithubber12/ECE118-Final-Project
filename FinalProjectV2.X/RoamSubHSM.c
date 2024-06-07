@@ -64,14 +64,21 @@ static const char *StateNames[] = {
 
 typedef enum {
     NOTURN,
-    PIVOTBLEFT,
+    RUN,
     PIVOTBRIGHT,
+    PIVOTBLEFT,
     PIVOTFLEFT,
     PIVOTFRIGHT,
     TANKTURNLEFT,
     TANKTURNRIGHT,
     LEFTDRIVE,
     RIGHTDRIVE,
+    PIVOTBRIGHT_WALL,
+    PIVOTBLEFT_WALL,
+    PIVOTFLEFT_WALL,
+    PIVOTFRIGHT_WALL,
+    LEFTDRIVE_WALL,
+    RIGHTDRIVE_WALL,
 } MotorFunc;
 
 //Timer Definitions
@@ -80,7 +87,7 @@ typedef enum {
 #define ONE_SECOND 1000
 #define TURN_TIMER 2
 #define BUMPER_TIMER 2
-#define ROAM_TIME 90000 // 1 min 30 seconds
+#define ROAM_TIME 60000 //35 seconds
 
 //Tape Definitions
 #define LeftTape 0x01
@@ -154,7 +161,7 @@ uint8_t InitRoamSubHSM(void) {
 ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
     uint8_t makeTransition = FALSE; // use to flag transition
     RoamSubHSMState_t nextState;
-    uint8_t curMotorBias = 1;
+    //uint8_t curMotorBias = 1;
     ES_Tattle(); // trace call stack
     switch (CurrentState) {
         case InitPSubState: // If current state is initial Psedudo State
@@ -172,63 +179,78 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
 
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    roboSway(curMotorBias);
+                    //roboSway(curMotorBias);
+                    run();
+                    ES_Timer_InitTimer(WATCH_DOG_TIMER, 5000);
                     break;
 
                 case TAPE_STATUS_CHANGE: //if a change in tape is detected
-                    makeTransition = TRUE;
-                    ThisEvent.EventParam = ES_NO_EVENT;
-                    if (PORTZ06_BIT || PORTZ08_BIT) {// ONLY Left Tape Sensor Triggered
+
+                    if (PORTZ06_BIT) {// ONLY Left Tape Sensor Triggered
                         nextMotorState = TANKTURNRIGHT;
                         nextState = BACKUP;
-                    } else if (PORTZ07_BIT || PORTZ05_BIT) {// ONLY TOP Right Tape Sensor Triggered
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (PORTZ07_BIT) {// ONLY TOP Right Tape Sensor Triggered
                         nextMotorState = TANKTURNLEFT;
                         nextState = BACKUP;
-                    } else if (!PORTZ06_BIT && !PORTZ08_BIT && !PORTZ05_BIT && !PORTZ07_BIT) {
-                        nextMotorState = FREE_ROAM;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (!PORTZ06_BIT && !PORTZ09_BIT && !PORTZ11_BIT && !PORTZ07_BIT) {
+                        nextMotorState = RUN;
                         nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
                         ES_Timer_StopTimer(TURN_TIMER);
-                    } else {
-                        makeTransition = FALSE;
-                    }
-                    break;
-
-                case BACK_TAPE_STATUS_CHANGE: //if a change in tape is detected
-                    makeTransition = TRUE;
-                    ThisEvent.EventParam = ES_NO_EVENT;
-                    if (PORTZ09_BIT) { //TAPE BACK RIGHT TRIGGERED
+                    } else if (PORTZ09_BIT) { //TAPE BACK RIGHT TRIGGERED
                         nextMotorState = PIVOTFRIGHT;
                         nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
                     } else if (PORTZ11_BIT) { //TAPE BACK LEFT TRIGGERED
                         nextMotorState = PIVOTFLEFT;
                         nextState = TURN;
-                    } else if (!PORTZ06_BIT && !PORTZ08_BIT && !PORTZ05_BIT && !PORTZ07_BIT) {
-                        nextMotorState = FREE_ROAM;
-                        nextState = TURN;
-                        ES_Timer_StopTimer(TURN_TIMER);
-                    } else {
-                        makeTransition = FALSE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
                     }
                     break;
 
                 case BUMPER_STATUS_CHANGE:
-                    makeTransition = TRUE;
-                    ThisEvent.EventParam = ES_NO_EVENT;
-                    if (!PORTX10_BIT) {// BOTTOM Front Left Bumper
-                        nextMotorState = PIVOTBLEFT;
-                        nextState = BACKUP;
-                    } else if (!PORTX03_BIT) {//  BOTTOM Front Right Bumper
-                        nextMotorState = PIVOTBRIGHT;
-                        nextState = BACKUP;
-                    } else if (!PORTX04_BIT) {// Back Right Bumper
-                        nextMotorState = LEFTDRIVE;
+                    ES_Timer_InitTimer(WATCH_DOG_TIMER, 2000);
+                    if (ThisEvent.EventParam == 0x1) {// BOTTOM Front Left Bumper
+                        nextMotorState = PIVOTBLEFT_WALL;
                         nextState = TURN;
-                    } else if (!PORTX11_BIT) {// Back Left Bumper
-                        nextMotorState = RIGHTDRIVE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == 0x2) {//  BOTTOM Front Right Bumper
+                        nextMotorState = PIVOTBRIGHT_WALL;
                         nextState = TURN;
-                    } else {
-                        makeTransition = FALSE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == 0x4) {// Back Right Bumper
+                        nextMotorState = PIVOTBLEFT_WALL;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == 0x2) {// Back Left Bumper
+                        nextMotorState = PIVOTBRIGHT_WALL;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
                     }
+                    break;
+
+                case ES_TIMEOUT:
+                    if (ThisEvent.EventParam == WATCH_DOG_TIMER) {
+                        nextState = BACKUP;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    }
+                    break;
+
+
+                case ES_EXIT:
+                    ES_Timer_SetTimer(WATCH_DOG_TIMER, 5000);
                     break;
 
                 default: // all unhandled events pass the event back up to the next level
@@ -241,44 +263,48 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
                     ES_Timer_InitTimer(TURN_TIMER, 400);
+                    ES_Timer_InitTimer(WATCH_DOG_TIMER, 1000);
                     goBackward();
                     break;
-                case BACK_TAPE_STATUS_CHANGE: //if a change in tape is detected
-                    ThisEvent.EventType = ES_NO_EVENT;
-                    makeTransition = TRUE;
-                    if (PORTZ11_BIT) {//TAPE BACK LEFT TRIGGERED
-                        nextMotorState = PIVOTFLEFT;
+
+                case TAPE_STATUS_CHANGE: //if a change in tape is detected
+
+                    if (ThisEvent.EventParam == 0x4 || ThisEvent.EventParam == 0x8 || ThisEvent.EventParam == 0xC) {//TAPE BACK LEFT TRIGGERED
+                        nextMotorState = RUN;
                         nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
                         ES_Timer_StopTimer(TURN_TIMER);
-                    } else if (PORTZ09_BIT) { //TAPE BACK RIGHT TRIGGERED
-                        nextMotorState = PIVOTFRIGHT;
-                        nextState = TURN;
-                        ES_Timer_StopTimer(TURN_TIMER);
-                    } else {
-                        makeTransition = FALSE;
                     }
                     break;
 
                 case BUMPER_STATUS_CHANGE:
-                    makeTransition = TRUE;
-                    ThisEvent.EventParam = ES_NO_EVENT;
                     if (!PORTX04_BIT) {// Back Right Bumper
-                        nextMotorState = LEFTDRIVE;
+                        nextMotorState = PIVOTFLEFT;
                         nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
                         ES_Timer_StopTimer(TURN_TIMER);
                     } else if (!PORTX11_BIT) {// Back Left Bumper
-                        nextMotorState = RIGHTDRIVE;
+                        nextMotorState = PIVOTFRIGHT;
                         nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
                         ES_Timer_StopTimer(TURN_TIMER);
-                    } else {
-                        makeTransition = FALSE;
                     }
                     break;
+                case ES_TIMERSTOPPED:
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == TURN_TIMER) {
                         nextState = TURN;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                    } else if (ThisEvent.EventParam == WATCH_DOG_TIMER) {
+                        nextState = FREE_ROAM;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                        break;
                     }
                     break;
                 default: // all unhandled events pass the event back up to the next level
@@ -287,14 +313,20 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
             break;
 
         case TURN:
+
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    
+                    ES_Timer_InitTimer(TURN_TIMER, 600);
+                    ES_Timer_InitTimer(WATCH_DOG_TIMER, 1000);
                     switch (nextMotorState) {
                         case NOTURN:
                             nextState = FREE_ROAM;
-                            ThisEvent.EventType = ES_NO_EVENT;
                             makeTransition = TRUE;
+                            ThisEvent.EventType = ES_NO_EVENT;
+                            break;
+                        case RUN:
+                            run();
+                            ES_Timer_InitTimer(TURN_TIMER, 600);
                             break;
                         case PIVOTBLEFT:
                             pivotBackLeft();
@@ -320,41 +352,78 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                             tankTurnRight();
                             ES_Timer_InitTimer(TURN_TIMER, 600);
                             break;
-                        case LEFTDRIVE:
-                            slightLeftDrive();
-                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                        case PIVOTBRIGHT_WALL:
+                            pivotBackRight();
+                            ES_Timer_InitTimer(TURN_TIMER, 1200);
                             break;
-                        case RIGHTDRIVE:
-                            slightRightDrive();
-                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                        case PIVOTBLEFT_WALL:
+                            pivotBackLeft();
+                            ES_Timer_InitTimer(TURN_TIMER, 1200);
                             break;
+                        case PIVOTFLEFT_WALL:
+                            pivotForwardLeft();
+                            ES_Timer_InitTimer(TURN_TIMER, 1200);
+                            break;
+                        case PIVOTFRIGHT_WALL:
+                            pivotForwardRight();
+                            ES_Timer_InitTimer(TURN_TIMER, 1200);
+                            break;
+
                         default:
                             break;
                     }
                     break;
 
-                case BACK_TAPE_STATUS_CHANGE: //if a change in tape is detected
-                    ThisEvent.EventType = ES_NO_EVENT;
-                    makeTransition = TRUE;
-                    if (PORTZ11_BIT) {//TAPE BACK LEFT TRIGGERED
-                        nextMotorState = PIVOTFLEFT;
+                case TAPE_STATUS_CHANGE: //if a change in tape is detected
+                    if (ThisEvent.EventParam == 0x4 || ThisEvent.EventParam == 0x8 || ThisEvent.EventParam == 0xC) {//TAPE BACK LEFT TRIGGERED
+                        nextMotorState = RUN;
                         nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
                         ES_Timer_StopTimer(TURN_TIMER);
-                    } else if (PORTZ09_BIT) { //TAPE BACK RIGHT TRIGGERED
-                        nextMotorState = PIVOTFRIGHT;
-                        nextState = TURN;
-                        ES_Timer_StopTimer(TURN_TIMER);
-                    } else {
-                        makeTransition = FALSE;
+                    } else if (ThisEvent.EventParam == 0x1 || ThisEvent.EventParam == 0x2 || ThisEvent.EventParam == 0x3) {
+                        nextMotorState = PIVOTBLEFT;
+                        ThisEvent.EventType = ES_ENTRY;
                     }
                     break;
+                case BUMPER_STATUS_CHANGE:
+                    if (!PORTX10_BIT) {// BOTTOM Front Left Bumper
+                        nextMotorState = PIVOTBLEFT_WALL;
+                        nextState = BACKUP;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (!PORTX03_BIT) {//  BOTTOM Front Right Bumper
+                        nextMotorState = PIVOTBRIGHT_WALL;
+                        nextState = BACKUP;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (!PORTX04_BIT) {// Back Right Bumper
+                        nextMotorState = PIVOTBLEFT_WALL;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (!PORTX11_BIT) {// Back Left Bumper
+                        nextMotorState = PIVOTBRIGHT_WALL;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    }
+                    break;
+                case ES_TIMERSTOPPED:
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == TURN_TIMER) {
                         nextState = FREE_ROAM;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                    } else if (ThisEvent.EventParam == WATCH_DOG_TIMER) {
+                        nextState = FREE_ROAM;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                        break;
                     }
                     break;
+
                 default: // all unhandled events pass the event back up to the next level
                     break;
             }
