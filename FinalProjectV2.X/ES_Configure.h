@@ -23,7 +23,7 @@
 //#define POSTFUNCTION_FOR_KEYBOARD_INPUT PostGenericService
 
 //define for TattleTale
-#define USE_TATTLETALE
+//#define USE_TATTLETALE
 
 //uncomment to supress the entry and exit events
 //#define SUPPRESS_EXIT_ENTRY_IN_TATTLE
@@ -46,7 +46,8 @@ typedef enum {
     ES_TIMERSTOPPED, /* signals that a timer has stopped*/
     /* User-defined events start here */
     TAPE_STATUS_CHANGE,
-    BACK_TAPE_STATUS_CHANGE,
+    //BACK_TAPE_STATUS_CHANGE,
+    WALL_TAPE_STATUS_CHANGE,
     BUMPER_STATUS_CHANGE,
     BATTERY_CONNECTED,
     BATTERY_DISCONNECTED,
@@ -66,7 +67,7 @@ static const char *EventNames[] = {
 	"ES_TIMERACTIVE",
 	"ES_TIMERSTOPPED",
 	"TAPE_STATUS_CHANGE",
-	"BACK_TAPE_STATUS_CHANGE",
+	"WALL_TAPE_STATUS_CHANGE",
 	"BUMPER_STATUS_CHANGE",
 	"BATTERY_CONNECTED",
 	"BATTERY_DISCONNECTED",
@@ -95,16 +96,16 @@ static const char *EventNames[] = {
 #define TIMER2_RESP_FUNC PostRoboTopHSM
 #define TIMER3_RESP_FUNC PostBumperService
 #define TIMER4_RESP_FUNC PostRoboTopHSM
-#define TIMER5_RESP_FUNC PostBackTapeService
+#define TIMER5_RESP_FUNC PostWallTapeService
 #define TIMER6_RESP_FUNC PostRoboTopHSM
 #define TIMER7_RESP_FUNC PostRoboTopHSM
-#define TIMER8_RESP_FUNC TIMER_UNUSED
+#define TIMER8_RESP_FUNC PostRoboTopHSM
 #define TIMER9_RESP_FUNC PostRoboTopHSM
 #define TIMER10_RESP_FUNC TIMER_UNUSED
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
 #define TIMER13_RESP_FUNC PostRoboTopHSM
-#define TIMER14_RESP_FUNC TIMER_UNUSED
+#define TIMER14_RESP_FUNC PostRoboTopHSM
 #define TIMER15_RESP_FUNC PostRoboTopHSM
 
 
@@ -118,9 +119,10 @@ static const char *EventNames[] = {
 #define TAPE_SERVICE_TIMER 1
 #define BUMPER_SERVICE_TIMER 3
 #define ROAM_TIMER 4
-#define BACK_TAPE_SERVICE_TIMER 5
+#define WALL_TAPE_SERVICE_TIMER 5
 #define DEPOSIT_TIMER 6
 #define GenericTimer 15
+#define WATCH_DOG_TIMER 14
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of 
 // services that the framework will handle. Reasonable values are 8 and 16
@@ -190,11 +192,11 @@ static const char *EventNames[] = {
 // These are the definitions for Service 4
 #if NUM_SERVICES > 4
 // the header file with the public fuction prototypes
-#define SERV_4_HEADER "BackTapeService.h"
+#define SERV_4_HEADER "WallService.h"
 // the name of the Init function
-#define SERV_4_INIT InitBackTapeService
+#define SERV_4_INIT InitWallTapeService
 // the name of the run function
-#define SERV_4_RUN RunBackTapeService
+#define SERV_4_RUN RunWallTapeService
 // How big should this services Queue be?
 #define SERV_4_QUEUE_SIZE 3
 #endif

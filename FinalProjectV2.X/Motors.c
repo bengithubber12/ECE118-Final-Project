@@ -15,6 +15,8 @@
 /////* PRIVATE DEFINITIONS */////
 #define SPEEDRIGHT 55
 #define SPEEDLEFT 65
+//#define SPEEDRIGHT 45
+//#define SPEEDLEFT 60
 #define FORWARD 1
 #define BACKWARD -1
 #define ROBOT_MAXSPEED 100
@@ -121,8 +123,8 @@ int RoboBeltMtrSpeed(int beltSpeed){
 }
 
 void run(void) {
-    RoboLeftMtrSpeed(FORWARD * 70);
-    RoboRightMtrSpeed(FORWARD * 60);
+    RoboLeftMtrSpeed(FORWARD * SPEEDLEFT);
+    RoboRightMtrSpeed(FORWARD * SPEEDRIGHT);
 }
 
 void goBackward(void) {
@@ -145,36 +147,36 @@ void hardTurnRight(void) {
     RoboRightMtrSpeed(BACKWARD * 45);
 }
 
-void hardTurnLeft(void) {
-    RoboLeftMtrSpeed(BACKWARD * 50);
+void hardTurnLeft(void){
+    RoboLeftMtrSpeed(BACKWARD * 35);
     RoboRightMtrSpeed(SPEEDRIGHT * FORWARD);
 }
 void hardBackLeft(void){
     RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
-    RoboRightMtrSpeed(40 * FORWARD);
+    RoboRightMtrSpeed(25 * FORWARD);
 }
 void hardBackRight(void){
-    RoboLeftMtrSpeed(45 * FORWARD);
+    RoboLeftMtrSpeed(43 * FORWARD);
     RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
 }
 
 void pivotBackRight(void) {
-    RoboLeftMtrSpeed(BACKWARD * SPEEDLEFT);
+    RoboLeftMtrSpeed(BACKWARD * 60);
     RoboRightMtrSpeed(0);
 }
 
 void pivotBackLeft(void) {
     RoboLeftMtrSpeed(0);
-    RoboRightMtrSpeed(BACKWARD * SPEEDRIGHT);
+    RoboRightMtrSpeed(BACKWARD * 50);
 }
 
 void pivotForwardRight(void) {
     RoboLeftMtrSpeed(FORWARD * SPEEDLEFT);
-    RoboRightMtrSpeed(40);
+    RoboRightMtrSpeed(0);
 }
 
 void pivotForwardLeft(void) {
-    RoboLeftMtrSpeed(45);
+    RoboLeftMtrSpeed(0);
     RoboRightMtrSpeed(FORWARD * SPEEDRIGHT);
 }
 
@@ -185,12 +187,12 @@ void stop(void) {
 
 void slightRightDrive(void) {
     RoboLeftMtrSpeed(SPEEDLEFT);
-    RoboRightMtrSpeed(SPEEDRIGHT - 5);
+    RoboRightMtrSpeed(SPEEDRIGHT - 6);
 }
 
 void slightLeftDrive(void) {
-    RoboLeftMtrSpeed(SPEEDLEFT - 5);
-    RoboRightMtrSpeed(SPEEDRIGHT);
+    RoboLeftMtrSpeed(SPEEDLEFT);
+    RoboRightMtrSpeed(SPEEDRIGHT + 3);
 }
 void roboSway(uint8_t bias){
     if (bias == 0){ //Left Sway
