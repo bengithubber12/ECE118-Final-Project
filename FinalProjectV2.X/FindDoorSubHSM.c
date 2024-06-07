@@ -198,15 +198,25 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
         case FIND_TAPE: // in the first state, replace this with correct names
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    RoboRightMtrSpeed(45);
-                    RoboLeftMtrSpeed(55);
+                    RoboRightMtrSpeed(50);
+                    RoboLeftMtrSpeed(60);
+                    if (tapeFound) {
+                        ES_Timer_InitTimer(WATCH_DOG_TIMER, 2000);
+                    }
+                    if ((PORTZ11_BIT || PORTZ09_BIT) && !PORTZ07_BIT && !PORTZ06_BIT) {
+                        break;
+                    } else if (PORTZ11_BIT || PORTZ09_BIT || PORTZ07_BIT || PORTZ06_BIT) {
+                        tapeFound = 1;
+                        nextState = PIVOT;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
                     break;
 
                 case TAPE_STATUS_CHANGE:
-                    if (ThisEvent.EventParam == 0xC || ThisEvent.EventParam == 0x04 || ThisEvent.EventParam == 0x08){
+                    if (ThisEvent.EventParam == 0xC || ThisEvent.EventParam == 0x04 || ThisEvent.EventParam == 0x08) {
                         break;
-                    }
-                    else if (ThisEvent.EventParam != NoTape) {
+                    } else if (ThisEvent.EventParam != NoTape) {
                         tapeFound = 1;
                         nextState = PIVOT;
                         makeTransition = TRUE;
@@ -232,18 +242,30 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
                     break;
+                 
+                case ES_TIMEOUT:
+                    if (ThisEvent.EventParam == WATCH_DOG_TIMER) {
+                        nextState = PIVOT;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    }
+                    break;
 
                 default: // all unhandled events pass the event back up to the next level
                     break;
             }
             break;
         case PIVOT:
-            RoboLeftMtrSpeed(-50);
+            RoboLeftMtrSpeed(-60);
             RoboRightMtrSpeed(0);
             switch (ThisEvent.EventType) {
+                case ES_ENTRY:
+                    ES_Timer_InitTimer(TURN_TIMER_ONE, 175);
+                    ES_Timer_InitTimer(WATCH_DOG_TIMER, 2000);
+                    break;
                 case TAPE_STATUS_CHANGE:
                     if (ThisEvent.EventParam == NoTape) {
-                        ES_Timer_InitTimer(TURN_TIMER_ONE, 250);
+                        ES_Timer_InitTimer(TURN_TIMER_ONE, 175);
                     } else if (PORTZ07_BIT && PORTZ11_BIT) {
                         nextState = FIND_TAPE;
                         makeTransition = TRUE;
@@ -254,12 +276,18 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                         ES_Timer_StopTimer(TURN_TIMER_ONE);
-                    } else if (ThisEvent.EventParam == 0x8) {
-                        nextState = RUN_FWD;
+                    }//else if (ThisEvent.EventParam == 0x8) {
+                        //  nextState = RUN_FWD;
+                        //  makeTransition = TRUE;
+                        // ThisEvent.EventType = ES_NO_EVENT;
+                        // ES_Timer_StopTimer(TURN_TIMER_ONE);
+                        //} 
+                    else if (ThisEvent.EventParam == 0xC) {
+                        nextState = FIND_TAPE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                         ES_Timer_StopTimer(TURN_TIMER_ONE);
-                    } else if (ThisEvent.EventParam == 0xC) {
+                    } else if (ThisEvent.EventParam == 0x3) {
                         nextState = FIND_TAPE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
@@ -288,15 +316,21 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                         nextState = FIND_TAPE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == WATCH_DOG_TIMER) {
+                        RoboLeftMtrSpeed(-60);
+                        RoboRightMtrSpeed(0);
+                        nextState = FIND_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
                     }
                 default:
                     break;
             }
             break;
-        
+
         case RUN_FWD:
-            RoboLeftMtrSpeed(45);
-            RoboRightMtrSpeed(55);
+            RoboLeftMtrSpeed(50);
+            RoboRightMtrSpeed(50);
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
                     ES_Timer_InitTimer(STRAIGHT_TIMER, 200);
@@ -304,7 +338,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
 
 
                 case TAPE_STATUS_CHANGE:
-                    if (ThisEvent.EventParam == 0x1 || ThisEvent.EventParam == 0x2) {
+                    if (ThisEvent.EventParam == 0x1 || ThisEvent.EventParam == 0x2 || ThisEvent.EventParam == 0x3) {
                         nextState = PIVOT;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
@@ -409,6 +443,11 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
 
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == STRAIGHT_TIMER) {
+                        nextState = FIND_TAPE;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                        break;
+                        /*
                         if (driveTracker == 1) {
                             nextState = SECOND_TURN;
                             makeTransition = TRUE;
@@ -423,6 +462,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                             ThisEvent.EventType = ES_NO_EVENT;
                             break;
                         }
+                         * */
                     }
                     break;
 
