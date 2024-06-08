@@ -250,6 +250,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
                     break;
+                    
 
                 default: // all unhandled events pass the event back up to the next level
                     break;

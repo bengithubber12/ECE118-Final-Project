@@ -319,6 +319,13 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                     // tankTurnLeft();
                     //}
                     break;
+                    
+//                case BUMPER_STATUS_CHANGE:
+//                    PostRoboTopHSM((ES_Event) {
+//                                DOOR_FOUND, 0
+//                            });
+//                    break;
+
                 default:
                     break;
 
@@ -336,7 +343,7 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
             //tankTurnLeft();
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(WATCH_DOG_TIMER, 5000);
+                    ES_Timer_InitTimer(WATCH_DOG_TIMER, 2000);
                     break;
 
                 case TAPE_STATUS_CHANGE:
@@ -359,10 +366,10 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                     //  ThisEvent.EventType = ES_NO_EVENT;
                     //}
                     break;
-
+                
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == WATCH_DOG_TIMER) {
-                        nextState = WALL_FIRST_ALIGN;
+                        nextState = FIND_TAPE;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                         break;
@@ -388,6 +395,13 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
                     break;
+                    
+//                case BUMPER_STATUS_CHANGE:
+//                    PostRoboTopHSM((ES_Event) {
+//                                DOOR_FOUND, 0
+//                            });
+//                    break;
+
                 default:
                     break;
 
@@ -482,6 +496,8 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                         if (MowerCounter == MowerCounterLimit) {
                             pivotBackLeft();
                             initTurnComplete = 0;
+                            MowerCounter = 0;
+
                             PostRoboTopHSM((ES_Event) {
                                 DOOR_FOUND, 0
                             });
@@ -525,21 +541,6 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                         ThisEvent.EventType = ES_NO_EVENT;
                         break;
                     }
-
-
-                    /*
-                    if (!PORTZ08_BIT) {
-                        pivot = 1;
-                        nextState = MOW_PIVOT;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    } else if (!PORTZ05_BIT) {
-                        pivot = 0;
-                        nextState = MOW_PIVOT;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                     * */
                     break;
 
                 case BUMPER_STATUS_CHANGE:
@@ -554,29 +555,29 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
             break;
 
         case MOW_PIVOT:
-            if (pivot == 1) {
-                pivotBackLeft();
-            } else {
-                pivotBackRight();
+            if (pivot == 1) { //Left
+                pivotForwardRight();
+            } else { //Right
+                pivotForwardLeft();
             }
             switch (ThisEvent.EventType) {
 
                 case ES_ENTRY:
-                    if (!PORTZ08_BIT) { //Left
-                        pivot = 1;
-                        nextState = MOW_PIVOT;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                        break;
-                    } else if (!PORTZ05_BIT) { //Right
-                        pivot = 0;
-                        nextState = MOW_PIVOT;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                        break;
-                    }
+                    //                    if (!PORTZ08_BIT) { //Left
+                    //                        pivot = 1;
+                    //                        nextState = MOW_PIVOT;
+                    //                        makeTransition = TRUE;
+                    //                        ThisEvent.EventType = ES_NO_EVENT;
+                    //                        break;
+                    //                    } else if (!PORTZ05_BIT) { //Right
+                    //                        pivot = 0;
+                    //                        nextState = MOW_PIVOT;
+                    //                        makeTransition = TRUE;
+                    //                        ThisEvent.EventType = ES_NO_EVENT;
+                    //                        break;
+                    //                    }
                     break;
-
+                case ES_NO_EVENT:
                 case WALL_TAPE_STATUS_CHANGE:
                     nextState = MOW;
                     makeTransition = TRUE;
