@@ -78,7 +78,7 @@ ES_Event RunWallTapeService(ES_Event ThisEvent) {
                 ReturnEvent.EventType = WALL_TAPE_STATUS_CHANGE;
                 ReturnEvent.EventParam = curEvent;
                 lastEvent = curEvent;
-                PostRoboTopHSM(ReturnEvent);
+                //PostRoboTopHSM(ReturnEvent);
                 //PostWallTapeService(ReturnEvent);
             }
             break;

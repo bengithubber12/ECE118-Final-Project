@@ -70,15 +70,11 @@ typedef enum {
     PIVOTFLEFT,
     PIVOTFRIGHT,
     TANKTURNLEFT,
-    TANKTURNRIGHT,
-    LEFTDRIVE,
-    RIGHTDRIVE,
+    TANKTURNRIGHT, //removed leftdrive and rightdrive
     PIVOTBRIGHT_WALL,
     PIVOTBLEFT_WALL,
     PIVOTFLEFT_WALL,
     PIVOTFRIGHT_WALL,
-    LEFTDRIVE_WALL,
-    RIGHTDRIVE_WALL,
 } MotorFunc;
 
 //Timer Definitions
@@ -87,7 +83,7 @@ typedef enum {
 #define ONE_SECOND 1000
 #define TURN_TIMER 2
 #define BUMPER_TIMER 2
-#define ROAM_TIME 60000 //35 seconds
+#define ROAM_TIME 60000 //60 seconds
 
 //Tape Definitions
 #define LeftTape 0x01
@@ -181,7 +177,7 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                 case ES_ENTRY:
                     //roboSway(curMotorBias);
                     run();
-                    ES_Timer_InitTimer(WATCH_DOG_TIMER, 5000);
+                    ES_Timer_InitTimer(WATCH_DOG_TIMER, 2000);
                     break;
 
                 case TAPE_STATUS_CHANGE: //if a change in tape is detected
@@ -227,12 +223,32 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                         nextState = TURN;
                         makeTransition = TRUE;
                         ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == 0x3) {
+                        nextMotorState = PIVOTBRIGHT_WALL;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
                     } else if (ThisEvent.EventParam == 0x4) {// Back Right Bumper
+                        nextMotorState = RUN;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == 0x8) {// Back Left Bumper
+                        nextMotorState = RUN;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (ThisEvent.EventParam == 0xC) {
+                        nextMotorState = RUN;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (!PORTX12_BIT) {
                         nextMotorState = PIVOTBLEFT_WALL;
                         nextState = TURN;
                         makeTransition = TRUE;
                         ThisEvent.EventParam = ES_NO_EVENT;
-                    } else if (ThisEvent.EventParam == 0x2) {// Back Left Bumper
+                    } else if (!PORTX05_BIT) {
                         nextMotorState = PIVOTBRIGHT_WALL;
                         nextState = TURN;
                         makeTransition = TRUE;
@@ -250,7 +266,7 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
 
 
                 case ES_EXIT:
-                    ES_Timer_SetTimer(WATCH_DOG_TIMER, 5000);
+                    ES_Timer_SetTimer(WATCH_DOG_TIMER, 2000);
                     break;
 
                 default: // all unhandled events pass the event back up to the next level
@@ -316,7 +332,7 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
 
             switch (ThisEvent.EventType) {
                 case ES_ENTRY:
-                    ES_Timer_InitTimer(TURN_TIMER, 600);
+                    ES_Timer_InitTimer(TURN_TIMER, 250);
                     ES_Timer_InitTimer(WATCH_DOG_TIMER, 1000);
                     switch (nextMotorState) {
                         case NOTURN:
@@ -326,47 +342,47 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                             break;
                         case RUN:
                             run();
-                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
                         case PIVOTBLEFT:
                             pivotBackLeft();
-                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
                         case PIVOTBRIGHT:
                             pivotBackRight();
-                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
                         case PIVOTFLEFT:
                             pivotForwardLeft();
-                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
                         case PIVOTFRIGHT:
                             pivotForwardRight();
-                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
                         case TANKTURNLEFT:
                             tankTurnLeft();
-                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
                         case TANKTURNRIGHT:
                             tankTurnRight();
-                            ES_Timer_InitTimer(TURN_TIMER, 600);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
                         case PIVOTBRIGHT_WALL:
                             pivotBackRight();
-                            ES_Timer_InitTimer(TURN_TIMER, 1200);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
                         case PIVOTBLEFT_WALL:
                             pivotBackLeft();
-                            ES_Timer_InitTimer(TURN_TIMER, 1200);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
                         case PIVOTFLEFT_WALL:
                             pivotForwardLeft();
-                            ES_Timer_InitTimer(TURN_TIMER, 1200);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
                         case PIVOTFRIGHT_WALL:
                             pivotForwardRight();
-                            ES_Timer_InitTimer(TURN_TIMER, 1200);
+                            ES_Timer_InitTimer(TURN_TIMER, 300);
                             break;
 
                         default:
@@ -403,6 +419,16 @@ ES_Event RunRoamSubHSM(ES_Event ThisEvent) {
                         makeTransition = TRUE;
                         ThisEvent.EventParam = ES_NO_EVENT;
                     } else if (!PORTX11_BIT) {// Back Left Bumper
+                        nextMotorState = PIVOTBRIGHT_WALL;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (!PORTX12_BIT) {
+                        nextMotorState = PIVOTBLEFT_WALL;
+                        nextState = TURN;
+                        makeTransition = TRUE;
+                        ThisEvent.EventParam = ES_NO_EVENT;
+                    } else if (!PORTX05_BIT) {
                         nextMotorState = PIVOTBRIGHT_WALL;
                         nextState = TURN;
                         makeTransition = TRUE;

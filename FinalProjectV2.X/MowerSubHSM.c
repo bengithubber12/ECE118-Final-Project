@@ -18,9 +18,6 @@
 typedef enum {
     InitPSubState,
     FIND_TAPE,
-    FIND_TAPE_OR_WALL,
-    TURN_FROM_TAPE,
-    PIVOT,
     MOW,
     MOW_PIVOT,
     TURN,
@@ -30,12 +27,6 @@ typedef enum {
     CHECK_WHITE_LEFT,
     F_ALIGN,
     F_REALIGN,
-    WALL_TURN,
-    INIT_TURN,
-    OBSTACLE,
-    AWAY_TAPE,
-    TOWARD_TAPE,
-    WALL_FIRST_ALIGN,
 
 } MowerSubHSMState_t;
 
@@ -182,88 +173,6 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
             }
             break;
 
-        case FIND_TAPE_OR_WALL:
-            RoboLeftMtrSpeed(65);
-            RoboRightMtrSpeed(55);
-            switch (ThisEvent.EventType) {
-                case ES_ENTRY:
-                    ES_Timer_InitTimer(ADJUST_TIMER, 4000);
-                    break;
-
-                case ES_EXIT:
-                    ES_Timer_SetTimer(ADJUST_TIMER, 4000);
-                    break;
-
-                case ES_TIMEOUT:
-                    if (ThisEvent.EventParam == ADJUST_TIMER) {
-                        nextState = WALL_TURN;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                    }
-                    break;
-
-                case BUMPER_STATUS_CHANGE:
-                    switch (ThisEvent.EventParam) {
-                        case BOT_FLB:
-                            RoboLeftMtrSpeed(-30);
-                            RoboRightMtrSpeed(50);
-                            break;
-                        case BOT_FRB:
-                            RoboLeftMtrSpeed(50);
-                            RoboRightMtrSpeed(-30);
-                            break;
-                        case BOT_FrontBumpers:
-                            nextState = WALL_TURN;
-                            makeTransition = TRUE;
-                            ThisEvent.EventType = ES_NO_EVENT;
-                            break;
-
-                        case TOP_FrontBumpers:
-                        case TOP_FRB:
-                        case TOP_FLB:
-                            nextState = OBSTACLE;
-                            makeTransition = TRUE;
-                            ThisEvent.EventType = ES_NO_EVENT;
-                            break;
-
-                        default:
-                            break;
-                    }
-                    break;
-
-                case TAPE_STATUS_CHANGE:
-                    nextState = TURN_FROM_TAPE;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                    break;
-
-                default:
-                    break;
-            }
-            break;
-
-        case OBSTACLE:
-            pivotBackLeft();
-            switch (ThisEvent.EventType) {
-                case ES_ENTRY:
-                    ES_Timer_InitTimer(OBSTACLE_TIMER, ONE_SECOND);
-                    break;
-                case ES_TIMEOUT:
-                    if (ThisEvent.EventParam == OBSTACLE_TIMER) {
-                        nextState = FIND_TAPE_OR_WALL;
-                        makeTransition = TRUE;
-                        ThisEvent.EventType = ES_NO_EVENT;
-                        break;
-                    }
-                    break;
-                case ES_EXIT:
-                    ES_Timer_SetTimer(OBSTACLE_TIMER, ONE_SECOND);
-                    break;
-                default:
-                    break;
-            }
-            break;
-
         case FIND_TAPE: // in the first state, replace this with correct names
             RoboLeftMtrSpeed(50);
             RoboRightMtrSpeed(55);
@@ -282,23 +191,6 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                     ThisEvent.EventType = ES_NO_EVENT;
                     break;
 
-                    //case BUMPER_STATUS_CHANGE:
-                    //    if ((ThisEvent.EventParam == 0x1) || (ThisEvent.EventParam == 0x2) || (ThisEvent.EventParam == 0x3)) {
-                    //        nextState = ALIGN;
-                    //        makeTransition = TRUE;
-                    //        ThisEvent.EventType = ES_NO_EVENT;
-                    //        break;
-                    //    }
-                    //    break;
-
-                    //case WALL_TAPE_STATUS_CHANGE:
-                    //    nextState = WALL_FIRST_ALIGN;
-                    //    makeTransition = TRUE;
-                    //    ThisEvent.EventType = ES_NO_EVENT;
-                    //    break;
-
-
-
                 default: // all unhandled events pass the event back up to the next level
                     break;
             }
@@ -315,16 +207,8 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                         nextState = MOW;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
-                    } //else if (ThisEvent.EventParam == 0x4){
-                    // tankTurnLeft();
-                    //}
+                    }
                     break;
-                    
-//                case BUMPER_STATUS_CHANGE:
-//                    PostRoboTopHSM((ES_Event) {
-//                                DOOR_FOUND, 0
-//                            });
-//                    break;
 
                 default:
                     break;
@@ -356,15 +240,6 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
-                    //if (PORTZ09_BIT && !PORTZ11_BIT && !PORTZ06_BIT && !PORTZ07_BIT) {
-                    //    nextState = REALIGN;
-                    //    makeTransition = TRUE;
-                    //     ThisEvent.EventType = ES_NO_EVENT;
-                    // } //else if ((ThisEvent.EventParam == 0x8)) {
-                    //  nextState = ALIGN;
-                    //  makeTransition = TRUE;
-                    //  ThisEvent.EventType = ES_NO_EVENT;
-                    //}
                     break;
                 
                 case ES_TIMEOUT:
@@ -395,12 +270,6 @@ ES_Event RunMowerSubHSM(ES_Event ThisEvent) {
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
                     break;
-                    
-//                case BUMPER_STATUS_CHANGE:
-//                    PostRoboTopHSM((ES_Event) {
-//                                DOOR_FOUND, 0
-//                            });
-//                    break;
 
                 default:
                     break;

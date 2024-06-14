@@ -186,7 +186,7 @@ ES_Event RunRoboTopHSM(ES_Event ThisEvent) {
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == DEPOSIT_TIMER) {
                         RC_SetPulseTime(RC_PORTW08, 1250);
-                        nextState = MOWING;
+                        nextState = ROAMING;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
                     }

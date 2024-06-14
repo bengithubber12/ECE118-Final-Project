@@ -131,7 +131,7 @@ static const char *StateNames[] = {
 
 static FindDoorSubHSMState_t CurrentState = InitPSubState;
 static uint8_t MyPriority;
-static uint8_t tapeFound = 0;
+uint8_t tapeFound = 0;
 static uint8_t driveTracker = 0;
 static uint8_t prevTapeRead = 0;
 /*******************************************************************************
@@ -205,8 +205,12 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                     }
                     if ((PORTZ11_BIT || PORTZ09_BIT) && !PORTZ07_BIT && !PORTZ06_BIT) {
                         break;
-                    } else if (PORTZ11_BIT || PORTZ09_BIT || PORTZ07_BIT || PORTZ06_BIT) {
+                    } else if (PORTZ09_BIT || PORTZ07_BIT) {
                         tapeFound = 1;
+                        nextState = PIVOT;
+                        makeTransition = TRUE;
+                        ThisEvent.EventType = ES_NO_EVENT;
+                    } else if (PORTZ11_BIT || PORTZ06_BIT) {
                         nextState = PIVOT;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
@@ -217,7 +221,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                     if (ThisEvent.EventParam == 0xC || ThisEvent.EventParam == 0x04 || ThisEvent.EventParam == 0x08) {
                         break;
                     } else if (ThisEvent.EventParam != NoTape) {
-                        tapeFound = 1;
+                        
                         nextState = PIVOT;
                         makeTransition = TRUE;
                         ThisEvent.EventType = ES_NO_EVENT;
@@ -242,7 +246,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
                     break;
-                 
+
                 case ES_TIMEOUT:
                     if (ThisEvent.EventParam == WATCH_DOG_TIMER) {
                         nextState = PIVOT;
@@ -250,7 +254,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                         ThisEvent.EventType = ES_NO_EVENT;
                     }
                     break;
-                    
+
 
                 default: // all unhandled events pass the event back up to the next level
                     break;
@@ -373,9 +377,8 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                 pivotForwardRight();
             } else if (!PORTX11_BIT) {// Back Bottom Left Bumper
                 pivotForwardLeft();
-            } else if (!PORTX10_BIT) {// Bottom Front Left Bumper
+            } else if (!PORTX10_BIT && PORTX12_BIT && PORTX05_BIT) {// Bottom Front Left Bumper
                 if (tapeFound == 1) {
-                    printf("Front Left Bumper\r\n");
 
                     PostRoboTopHSM((ES_Event) {
                         DOOR_FOUND, 0
@@ -384,7 +387,7 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                     pivotBackLeft();
                 }
 
-            } else if (!PORTX03_BIT) {// Bottom Front Right Bumper
+            } else if (!PORTX03_BIT && PORTX12_BIT && PORTX05_BIT) {// Bottom Front Right Bumper
                 if (tapeFound == 1) {
 
                     PostRoboTopHSM((ES_Event) {
@@ -393,6 +396,18 @@ ES_Event RunFindDoorSubHSM(ES_Event ThisEvent) {
                 } else {
                     pivotBackRight();
                 }
+            } else if (!PORTX12_BIT) {// Front Left Hit
+                nextState = FIRST_TURN;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+                tapeFound = 0;
+                break;
+            } else if (!PORTX05_BIT) {// Front Right Hit
+                nextState = FIRST_TURN;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+                tapeFound = 0;
+                break;
             }
 
             switch (ThisEvent.EventType) {
